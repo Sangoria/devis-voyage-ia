@@ -76,12 +76,12 @@ function renderLines(lines) {
 
 /* ─── Section colours ────────────────────────────────────────────────── */
 const PALETTES = [
-  { accent: "#6366F1", light: "#EEF2FF", dark: "#4338CA" },
-  { accent: "#10B981", light: "#ECFDF5", dark: "#047857" },
-  { accent: "#F59E0B", light: "#FFFBEB", dark: "#B45309" },
-  { accent: "#8B5CF6", light: "#F5F3FF", dark: "#6D28D9" },
-  { accent: "#EF4444", light: "#FEF2F2", dark: "#B91C1C" },
-  { accent: "#0EA5E9", light: "#F0F9FF", dark: "#0369A1" },
+  { accent: "#C4714A", light: "#F5E6DF", dark: "#8B4A2E" }, // Terracotta
+  { accent: "#B8965A", light: "#F5EDD8", dark: "#7A6030" }, // Gold
+  { accent: "#1A3040", light: "#E8EEF2", dark: "#0F1E28" }, // Ocean Deep
+  { accent: "#8A9BA8", light: "#EEF2F5", dark: "#4A6470" }, // Mist
+  { accent: "#C4714A", light: "#F5E6DF", dark: "#8B4A2E" }, // Terracotta
+  { accent: "#B8965A", light: "#F5EDD8", dark: "#7A6030" }, // Gold
 ];
 
 /* ─── Main component ─────────────────────────────────────────────────── */

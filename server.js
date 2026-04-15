@@ -9,57 +9,90 @@ app.use(express.json());
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-app.post("/api/generate-itinerary", async (req, res) => {
-  const { destination, voyageurs, budget, dateDebut, dateFin, typeVoyage } = req.body;
+// ── POST /api/generate-quote ──────────────────────────────────────────
+// Reçoit les données du formulaire, appelle Claude, retourne un JSON structuré
+app.post("/api/generate-quote", async (req, res) => {
+  const { destination, voyageurs, budget, dateDebut, dateFin, demandeClient } = req.body || {};
 
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache");
-  res.setHeader("Connection", "keep-alive");
+  // Seule la demande client est obligatoire
+  if (!demandeClient) {
+    return res.status(400).json({ error: "La demande client est obligatoire." });
+  }
 
   try {
-    const stream = client.messages.stream({
-      model: "claude-opus-4-6",
-      max_tokens: 2048,
+    const response = await client.messages.create({
+      model: "claude-sonnet-4-5",
+      max_tokens: 3000,
+      system: `Tu es un expert en devis voyage pour agences indépendantes.
+Tu réponds UNIQUEMENT avec du JSON valide, sans balise markdown, sans texte avant ou après.
+Le JSON doit respecter EXACTEMENT cette structure :
+{
+  "titre": "string",
+  "resume": "string",
+  "itineraire": [
+    {
+      "jour": 1,
+      "date": "YYYY-MM-DD",
+      "titre": "string",
+      "matin": "string",
+      "apresmidi": "string",
+      "soir": "string"
+    }
+  ],
+  "couts": {
+    "vols":        { "detail": "string", "montant": 0 },
+    "hebergement": { "detail": "string", "montant": 0 },
+    "excursions":  { "detail": "string", "montant": 0 },
+    "transferts":  { "detail": "string", "montant": 0 },
+    "divers":      { "detail": "string", "montant": 0 }
+  },
+  "totalTTC": 0,
+  "conseilsPratiques": ["string"]
+}`,
       messages: [
         {
           role: "user",
-          content: `Tu es un expert en voyage. Génère un itinéraire détaillé et personnalisé pour :
+          content: `Génère un devis voyage professionnel à partir de cette demande :
 
-- Destination : ${destination}
-- Voyageurs : ${voyageurs} personne(s)
-- Budget total : ${budget}€
-- Dates : du ${dateDebut} au ${dateFin}
-- Type de voyage : ${typeVoyage}
+"${demandeClient}"
 
-Structure ta réponse ainsi :
-1. 📋 Résumé du voyage
-2. 📅 Itinéraire jour par jour (matin / après-midi / soir)
-3. 🏨 Hébergements recommandés
-4. 🍽️ Restaurants et spécialités locales
-5. 💰 Répartition du budget estimée
-6. 💡 Conseils pratiques (visa, météo, transport local)`,
+${destination ? `- Destination confirmée : ${destination}` : ""}
+${voyageurs ? `- Voyageurs : ${voyageurs} personne(s)` : ""}
+${budget ? `- Budget total : ${budget} €` : ""}
+${dateDebut ? `- Départ : ${dateDebut}` : ""}
+${dateFin ? `- Retour : ${dateFin}` : ""}
+
+Si certaines informations manquent (destination, dates, budget, nombre de voyageurs), déduis-les de la demande client ou propose des valeurs réalistes.
+${budget ? `Le total de tous les postes de coûts doit être inférieur ou égal au budget de ${budget} €.` : ""}
+Génère un itinéraire jour par jour pour toute la durée du séjour.`,
         },
       ],
     });
 
-    for await (const event of stream) {
-      if (
-        event.type === "content_block_delta" &&
-        event.delta.type === "text_delta"
-      ) {
-        res.write(`data: ${JSON.stringify({ text: event.delta.text })}\n\n`);
-      }
+    // Extraire le texte de la réponse
+    const rawText = response.content[0]?.text ?? "";
+
+    // Parser le JSON retourné par Claude
+    let devis;
+    try {
+      // Nettoyer au cas où Claude ajouterait des backticks malgré le system prompt
+      const cleaned = rawText.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
+      devis = JSON.parse(cleaned);
+    } catch {
+      console.error("Réponse Claude non-JSON :", rawText);
+      return res.status(500).json({ error: "La réponse IA n'est pas au bon format. Réessayez." });
     }
 
-    res.write("data: [DONE]\n\n");
+    res.json({ devis });
   } catch (err) {
-    res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
-  } finally {
-    res.end();
+    res.status(500).json({ error: err.message || "Erreur lors de la génération du devis. Réessayez." });
   }
 });
 
 const PORT = 3001;
 app.listen(PORT, () =>
-  console.log(`✅ Serveur API démarré sur http://localhost:${PORT}`)
+  console.log(`✅ Serveur Qovee démarré sur http://localhost:${PORT}`)
 );
+
+// Maintient le process en vie (Node v24 + Express 5 sur Windows)
+setInterval(() => {}, 1 << 30);

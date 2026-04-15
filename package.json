@@ -1,7 +1,7 @@
 {
-  "name": "devis-voyage-ia",
+  "name": "qovee",
   "version": "1.0.0",
-  "description": "",
+  "description": "Qovee — Générateur de devis voyage IA pour agences indépendantes",
   "main": "index.js",
   "scripts": {
     "dev": "concurrently \"node server.js\" \"vite\"",
@@ -16,7 +16,7 @@
     "@anthropic-ai/sdk": "^0.87.0",
     "concurrently": "^9.2.1",
     "cors": "^2.8.6",
-    "dotenv": "^17.4.1",
+    "dotenv": "^16.6.1",
     "express": "^5.2.1",
     "react": "^19.2.5",
     "react-dom": "^19.2.5"
