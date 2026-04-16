@@ -1,91 +1,211 @@
 require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
+const express   = require("express");
+const cors      = require("cors");
 const Anthropic = require("@anthropic-ai/sdk");
+const Stripe    = require("stripe");
 
-const app = express();
+const app    = express();
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY || "");
+
 app.use(cors());
+
+// ── Webhook Stripe — RAW BODY, doit être AVANT express.json() ─────────────
+app.post("/api/webhook", express.raw({ type: "application/json" }), async (req, res) => {
+  const sig = req.headers["stripe-signature"];
+
+  if (!process.env.STRIPE_WEBHOOK_SECRET) {
+    console.error("[Webhook] STRIPE_WEBHOOK_SECRET manquant dans .env");
+    return res.status(500).json({ error: "Configuration webhook manquante" });
+  }
+
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    console.error("[Webhook] Signature invalide :", err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  // Client Supabase admin (service role — accès complet, contourne le RLS)
+  const { createClient } = await import("@supabase/supabase-js");
+  const supabaseAdmin = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
+  console.log(`[Stripe Webhook] Événement : ${event.type}`);
+
+  switch (event.type) {
+    case "checkout.session.completed": {
+      const session = event.data.object;
+      const userId  = session.metadata?.user_id;
+      if (userId) {
+        await supabaseAdmin.from("profiles").update({
+          stripe_customer_id  : session.customer,
+          subscription_status : "active",
+          subscription_id     : session.subscription,
+        }).eq("id", userId);
+        console.log(`[Stripe] Abonnement activé → user ${userId}`);
+      }
+      break;
+    }
+    case "customer.subscription.updated": {
+      const sub    = event.data.object;
+      const status = sub.status === "trialing" ? "trialing"
+                   : sub.status === "active"   ? "active"
+                   : sub.status;
+      await supabaseAdmin.from("profiles")
+        .update({ subscription_status: status })
+        .eq("stripe_customer_id", sub.customer);
+      break;
+    }
+    case "customer.subscription.deleted": {
+      const sub = event.data.object;
+      await supabaseAdmin.from("profiles")
+        .update({ subscription_status: "canceled" })
+        .eq("stripe_customer_id", sub.customer);
+      console.log(`[Stripe] Abonnement annulé → customer ${sub.customer}`);
+      break;
+    }
+    case "invoice.payment_failed": {
+      const invoice = event.data.object;
+      await supabaseAdmin.from("profiles")
+        .update({ subscription_status: "past_due" })
+        .eq("stripe_customer_id", invoice.customer);
+      break;
+    }
+  }
+
+  res.json({ received: true });
+});
+
+// Toutes les autres routes utilisent express.json()
 app.use(express.json());
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-// ── POST /api/generate-quote ──────────────────────────────────────────
-// Reçoit les données du formulaire, appelle Claude, retourne un JSON structuré
-app.post("/api/generate-quote", async (req, res) => {
-  const { destination, voyageurs, budget, dateDebut, dateFin, demandeClient } = req.body || {};
-
-  // Seule la demande client est obligatoire
-  if (!demandeClient) {
-    return res.status(400).json({ error: "La demande client est obligatoire." });
+// ── Extraction robuste du JSON depuis une réponse Claude ──────────────────
+function extractJSON(text) {
+  let cleaned = text.replace(/```json\s*/gi, "").replace(/```\s*/gi, "").trim();
+  const start = cleaned.indexOf("{");
+  const end   = cleaned.lastIndexOf("}");
+  if (start === -1 || end === -1 || end <= start) {
+    throw new Error(`Aucun objet JSON trouvé. Début reçu : "${cleaned.substring(0, 120)}"`);
   }
-
+  const jsonStr = cleaned.slice(start, end + 1);
   try {
+    return JSON.parse(jsonStr);
+  } catch (parseErr) {
+    throw new Error(`JSON invalide : ${parseErr.message}\nContenu (300 premiers caractères) : ${jsonStr.substring(0, 300)}`);
+  }
+}
+
+// ── Appel Claude avec prefill "{" + retry unique ──────────────────────────
+async function callClaude(systemPrompt, userPrompt) {
+  const MAX_ATTEMPTS = 2;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    console.log(`\n[Claude] Tentative ${attempt}/${MAX_ATTEMPTS}`);
+    console.log("[Claude] User prompt :\n", userPrompt, "\n");
+
     const response = await client.messages.create({
-      model: "claude-sonnet-4-5",
-      max_tokens: 3000,
-      system: `Tu es un expert en devis voyage pour agences indépendantes.
-Tu réponds UNIQUEMENT avec du JSON valide, sans balise markdown, sans texte avant ou après.
-Le JSON doit respecter EXACTEMENT cette structure :
-{
-  "titre": "string",
-  "resume": "string",
-  "itineraire": [
-    {
-      "jour": 1,
-      "date": "YYYY-MM-DD",
-      "titre": "string",
-      "matin": "string",
-      "apresmidi": "string",
-      "soir": "string"
-    }
-  ],
-  "couts": {
-    "vols":        { "detail": "string", "montant": 0 },
-    "hebergement": { "detail": "string", "montant": 0 },
-    "excursions":  { "detail": "string", "montant": 0 },
-    "transferts":  { "detail": "string", "montant": 0 },
-    "divers":      { "detail": "string", "montant": 0 }
-  },
-  "totalTTC": 0,
-  "conseilsPratiques": ["string"]
-}`,
-      messages: [
-        {
-          role: "user",
-          content: `Génère un devis voyage professionnel à partir de cette demande :
-
-"${demandeClient}"
-
-${destination ? `- Destination confirmée : ${destination}` : ""}
-${voyageurs ? `- Voyageurs : ${voyageurs} personne(s)` : ""}
-${budget ? `- Budget total : ${budget} €` : ""}
-${dateDebut ? `- Départ : ${dateDebut}` : ""}
-${dateFin ? `- Retour : ${dateFin}` : ""}
-
-Si certaines informations manquent (destination, dates, budget, nombre de voyageurs), déduis-les de la demande client ou propose des valeurs réalistes.
-${budget ? `Le total de tous les postes de coûts doit être inférieur ou égal au budget de ${budget} €.` : ""}
-Génère un itinéraire jour par jour pour toute la durée du séjour.`,
-        },
+      model      : "claude-sonnet-4-6",
+      max_tokens : 8000,
+      system     : systemPrompt,
+      messages   : [
+        { role: "user",      content: userPrompt },
+        { role: "assistant", content: "{"        },
       ],
     });
 
-    // Extraire le texte de la réponse
-    const rawText = response.content[0]?.text ?? "";
+    const rawText = "{" + (response.content[0]?.text ?? "");
+    console.log("=== RÉPONSE BRUTE CLAUDE ===\n", rawText.substring(0, 500), "\n=== FIN ===");
 
-    // Parser le JSON retourné par Claude
-    let devis;
     try {
-      // Nettoyer au cas où Claude ajouterait des backticks malgré le system prompt
-      const cleaned = rawText.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
-      devis = JSON.parse(cleaned);
-    } catch {
-      console.error("Réponse Claude non-JSON :", rawText);
-      return res.status(500).json({ error: "La réponse IA n'est pas au bon format. Réessayez." });
+      return extractJSON(rawText);
+    } catch (err) {
+      console.error(`[Claude] Échec parsing tentative ${attempt} :`, err.message);
+      if (attempt === MAX_ATTEMPTS) throw err;
+      console.log("[Claude] Retry en cours…");
     }
+  }
+}
 
+// ── POST /api/generate-quote ──────────────────────────────────────────────
+app.post("/api/generate-quote", async (req, res) => {
+  const formData = req.body || {};
+  if (!formData.demandeClient) {
+    return res.status(400).json({ error: "La demande client est obligatoire." });
+  }
+  try {
+    const { generateDevisPrompt } = await import("./src/prompts/devisPrompt.js");
+    const { systemPrompt, userPrompt } = generateDevisPrompt(formData);
+    const devis = await callClaude(systemPrompt, userPrompt);
     res.json({ devis });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Erreur lors de la génération du devis. Réessayez." });
+    console.error("Erreur generate-quote :", err.message);
+    const isParsingError = err.message.includes("JSON") || err.message.includes("Aucun objet");
+    res.status(500).json({
+      error: isParsingError
+        ? "La génération a échoué. Réessayez dans un instant."
+        : (err.message || "Erreur lors de la génération du devis."),
+    });
+  }
+});
+
+// ── POST /api/create-checkout-session ────────────────────────────────────
+app.post("/api/create-checkout-session", async (req, res) => {
+  const { userId, userEmail } = req.body;
+  if (!userId) return res.status(400).json({ error: "userId manquant" });
+
+  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      mode                 : "subscription",
+      payment_method_types : ["card"],
+      customer_email       : userEmail || undefined,
+      line_items: [{
+        price_data: {
+          currency     : "eur",
+          product_data : { name: "Qovee — Abonnement mensuel" },
+          unit_amount  : 2900,
+          recurring    : { interval: "month" },
+        },
+        quantity: 1,
+      }],
+      subscription_data: {
+        trial_period_days : 14,
+        metadata          : { user_id: userId },
+      },
+      metadata    : { user_id: userId },
+      success_url : `${frontendUrl}/mes-devis?checkout=success`,
+      cancel_url  : `${frontendUrl}/pricing`,
+      locale      : "fr",
+    });
+
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error("Erreur checkout session :", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── POST /api/customer-portal ──────────────────────────────────────────────
+app.post("/api/customer-portal", async (req, res) => {
+  const { customerId } = req.body;
+  if (!customerId) return res.status(400).json({ error: "customerId manquant" });
+
+  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+
+  try {
+    const session = await stripe.billingPortal.sessions.create({
+      customer   : customerId,
+      return_url : `${frontendUrl}/mes-devis`,
+    });
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error("Erreur customer portal :", err.message);
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -94,5 +214,5 @@ app.listen(PORT, () =>
   console.log(`✅ Serveur Qovee démarré sur http://localhost:${PORT}`)
 );
 
-// Maintient le process en vie (Node v24 + Express 5 sur Windows)
+// Maintient le process en vie (Node v24 + Windows)
 setInterval(() => {}, 1 << 30);

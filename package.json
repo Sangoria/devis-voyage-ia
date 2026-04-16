@@ -14,12 +14,17 @@
   "type": "commonjs",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.87.0",
+    "@supabase/supabase-js": "^2.103.2",
     "concurrently": "^9.2.1",
     "cors": "^2.8.6",
     "dotenv": "^16.6.1",
     "express": "^5.2.1",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.7",
     "react": "^19.2.5",
-    "react-dom": "^19.2.5"
+    "react-dom": "^19.2.5",
+    "react-router-dom": "^7.14.1",
+    "stripe": "^22.0.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^6.0.1",
