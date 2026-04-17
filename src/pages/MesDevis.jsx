@@ -123,10 +123,10 @@ export default function MesDevis() {
   }
 
   // Télécharger le PDF depuis /mes-devis
-  function downloadPdf(row, e) {
+  async function downloadPdf(row, e) {
     e.stopPropagation();
     if (row.generated_content) {
-      generatePdf(row.generated_content, rowToFormData(row));
+      await generatePdf(row.generated_content, rowToFormData(row));
     }
   }
 
@@ -143,7 +143,7 @@ export default function MesDevis() {
             color: "#166534", borderRadius: "10px", padding: "0.9rem 1.25rem",
             marginBottom: "1.5rem", textAlign: "center", fontWeight: 600, fontSize: "0.9rem",
           }}>
-            ✓ Abonnement activé — bienvenue dans Qovee Pro&nbsp;! Devis illimités.
+            ✓ Abonnement activé, bienvenue dans Qovee Pro&nbsp;! Devis illimités.
           </div>
         )}
 
@@ -362,7 +362,7 @@ export default function MesDevis() {
                     devis={selected.generated_content}
                     onReset={() => setSelected(null)}
                     onModify={() => { setSelected(null); navigate("/"); }}
-                    onPdf={() => generatePdf(selected.generated_content, rowToFormData(selected))}
+                    onPdf={async () => await generatePdf(selected.generated_content, rowToFormData(selected))}
                   />
                 </div>
               ) : (

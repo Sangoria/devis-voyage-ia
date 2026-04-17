@@ -35,12 +35,7 @@ export default function Login() {
 
         {/* Logo */}
         <div className="auth-logo">
-          <svg viewBox="0 0 30 30" fill="none" width="36" height="36">
-            <circle cx="12" cy="12" r="8.5" stroke="#C4714A" strokeWidth="2.2"/>
-            <circle cx="12" cy="12" r="4.5" fill="rgba(196,113,74,.15)"/>
-            <path d="M18.5 18.5L26 26" stroke="#C4714A" strokeWidth="2.2" strokeLinecap="round"/>
-            <path d="M12 9v6M9 12h6" stroke="#C4714A" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
+          <img src="/favicon.png" width="72" height="72" alt="Qovee" />
           <span className="auth-wordmark">QOVEE</span>
         </div>
 

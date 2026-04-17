@@ -69,7 +69,7 @@ export default function Pricing() {
 
         {checkoutSuccess && (
           <div className="pricing-success-banner">
-            ✓ Abonnement activé — bienvenue dans Qovee Pro&nbsp;!
+            ✓ Abonnement activé, bienvenue dans Qovee Pro&nbsp;!
           </div>
         )}
 
@@ -127,7 +127,7 @@ export default function Pricing() {
               {loading ? (
                 <><span className="cta-spinner" />Redirection vers Stripe…</>
               ) : user ? (
-                "Commencer l'essai gratuit — 14 jours →"
+                "Commencer l'essai gratuit, 14 jours →"
               ) : (
                 "Créer un compte gratuit →"
               )}

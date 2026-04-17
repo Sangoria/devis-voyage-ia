@@ -1,83 +1,89 @@
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
-function QoveeLogo() {
-  return (
-    <svg className="nav-logo" viewBox="0 0 30 30" fill="none">
-      <circle cx="12" cy="12" r="8.5" stroke="#C4714A" strokeWidth="2.2"/>
-      <circle cx="12" cy="12" r="4.5" fill="rgba(196,113,74,.15)"/>
-      <path d="M18.5 18.5L26 26" stroke="#C4714A" strokeWidth="2.2" strokeLinecap="round"/>
-      <path d="M12 9v6M9 12h6" stroke="#C4714A" strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-  );
+function UserAvatar({ name }) {
+  const initials = name ? name.slice(0, 2).toUpperCase() : "?";
+  return <span className="nav-avatar">{initials}</span>;
 }
 
 export default function Nav() {
   const { user, profile, isSubscribed, signOut } = useAuth();
   const navigate  = useNavigate();
   const location  = useLocation();
+  const [scrolled, setScrolled] = useState(false);
 
-  const isHome     = location.pathname === "/";
+  const isCreer    = location.pathname === "/creer";
   const isMesDevis = location.pathname === "/mes-devis";
   const isPricing  = location.pathname === "/pricing";
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   async function handleSignOut() {
     await signOut();
     navigate("/login");
   }
 
+  const displayName = profile?.agency_name || user?.email?.split("@")[0] || "";
+
   return (
-    <nav className="nav">
+    <nav className={`nav${scrolled ? " nav-scrolled" : ""}`}>
       <div className="nav-inner">
 
-        {/* Logo */}
-        <Link to="/" className="nav-brand" style={{ textDecoration: "none" }}>
-          <QoveeLogo />
-          <span className="nav-name">QOVEE</span>
-        </Link>
-
-        {/* Droite */}
-        <div className="nav-right">
-          {user ? (
+        {/* GAUCHE */}
+        <div className="nav-left">
+          {user && (
             <>
-              {/* Lien Mes devis */}
+              <Link
+                to="/creer"
+                className={`nav-link${isCreer ? " nav-link-active" : ""}`}
+              >
+                Créer un devis
+              </Link>
               <Link
                 to="/mes-devis"
                 className={`nav-link${isMesDevis ? " nav-link-active" : ""}`}
               >
-                <svg viewBox="0 0 18 18" fill="none" width="14" height="14">
-                  <rect x="2" y="2" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.5"/>
-                  <path d="M5 6h8M5 9h8M5 12h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
                 Mes devis
               </Link>
+            </>
+          )}
+        </div>
 
-              {/* Lien Tarifs (uniquement pour les non-abonnés) */}
+        {/* CENTRE */}
+        <Link to="/" className="nav-brand">
+          <span className="nav-name">Qovee</span>
+        </Link>
+
+        {/* DROITE */}
+        <div className="nav-right">
+          {user ? (
+            <>
               {!isSubscribed && (
                 <Link
                   to="/pricing"
-                  className={`nav-link nav-link-pricing${isPricing ? " nav-link-active" : ""}`}
+                  className={`nav-btn-pro${isPricing ? " nav-btn-pro-active" : ""}`}
                 >
                   Passer Pro
                 </Link>
               )}
-
-              {/* Nom agence */}
-              <span className="nav-agency">
-                {profile?.agency_name || user.email?.split("@")[0]}
-              </span>
-
-              {/* Déconnexion */}
-              <button className="nav-signout" onClick={handleSignOut}>
-                <svg viewBox="0 0 18 18" fill="none" width="13" height="13">
+              <div className="nav-user">
+                <UserAvatar name={displayName} />
+                <span className="nav-agency">{displayName}</span>
+              </div>
+              <button className="nav-signout" onClick={handleSignOut} title="Déconnexion">
+                <svg viewBox="0 0 18 18" fill="none" width="15" height="15">
                   <path d="M7 16H3a1 1 0 01-1-1V3a1 1 0 011-1h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                   <path d="M12 12l4-4-4-4M16 8H7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                Déconnexion
               </button>
             </>
           ) : (
-            <Link to="/pricing" className="nav-badge" style={{ textDecoration: "none" }}>
+            <Link to="/pricing" className="nav-badge">
               Essai 14 jours
             </Link>
           )}

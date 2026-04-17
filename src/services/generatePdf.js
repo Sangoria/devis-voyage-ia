@@ -82,8 +82,19 @@ function drawFooter(doc, pageNum, totalPages, ref) {
   doc.text("Devis genere avec Qovee  \u00B7  qovee.fr  \u00B7  29 \u20AC/mois", W / 2, FOOT_Y + 13, { align: "center" });
 }
 
+// ── Helpers image ────────────────────────────────────────────────────
+async function loadImageAsDataUrl(url) {
+  const res  = await fetch(url);
+  const blob = await res.blob();
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
+}
+
 // ── Générateur principal ─────────────────────────────────────────────
-export function generatePdf(devis, formData = {}) {
+export async function generatePdf(devis, formData = {}) {
   const {
     titre             = "Voyage sur-mesure",
     resume            = "",
@@ -130,15 +141,9 @@ export function generatePdf(devis, formData = {}) {
   doc.setFillColor(...TERRA);
   doc.rect(0, 59, W, 3, "F");
 
-  // Logo : loupe (cercle + handle + croix intérieure)
-  doc.setDrawColor(...TERRA);
-  doc.setLineWidth(0.9);
-  doc.circle(MARGIN + 5.5, 18.5, 5.5, "S");
-  doc.setLineWidth(0.9);
-  doc.line(MARGIN + 9.3, 22.3, MARGIN + 13.5, 26.5);
-  doc.setLineWidth(0.5);
-  doc.line(MARGIN + 5.5, 15.5, MARGIN + 5.5, 21.5);
-  doc.line(MARGIN + 2.5, 18.5, MARGIN + 8.5, 18.5);
+  // Logo favicon
+  const logoDataUrl = await loadImageAsDataUrl("/favicon.png");
+  doc.addImage(logoDataUrl, "PNG", MARGIN, 11, 26, 26);
 
   // Wordmark QOVEE
   doc.setFont("helvetica", "bold");
