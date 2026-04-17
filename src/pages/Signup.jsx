@@ -75,7 +75,7 @@ export default function Signup() {
         </div>
 
         <h1 className="auth-title">Créer un compte</h1>
-        <p className="auth-sub">14 jours d'essai gratuit, sans carte bancaire.</p>
+        <p className="auth-sub">7 jours d'essai gratuit, sans carte bancaire.</p>
 
         {error && (
           <div className="auth-error">{error}</div>

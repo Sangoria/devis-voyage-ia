@@ -174,7 +174,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
         quantity: 1,
       }],
       subscription_data: {
-        trial_period_days : 14,
+        trial_period_days : 7,
         metadata          : { user_id: userId },
       },
       metadata    : { user_id: userId },

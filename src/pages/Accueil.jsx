@@ -62,7 +62,7 @@ export default function Accueil() {
             Qovee génère un devis voyage pro en 2 minutes.
           </p>
           <button className="hero-cta" onClick={handleCta}>
-            Essayer gratuitement 14 jours →
+            Essayer gratuitement 7 jours →
           </button>
           <div className="hero-features">
             {FEATURES.map((f) => (
@@ -158,7 +158,7 @@ export default function Accueil() {
               ))}
             </ul>
             <button className="lp-cta" onClick={handleCta}>
-              Commencer l'essai gratuit, 14 jours sans carte bancaire
+              Commencer l'essai gratuit, 7 jours sans carte bancaire
             </button>
           </div>
         </div>

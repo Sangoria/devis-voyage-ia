@@ -90,7 +90,7 @@ export default function Pricing() {
             <span className="pricing-period">/mois</span>
           </div>
 
-          <div className="pricing-trial-pill">14 jours d'essai gratuit</div>
+          <div className="pricing-trial-pill">7 jours d'essai gratuit</div>
 
           <ul className="pricing-features-list">
             {FEATURES.map((f) => (
@@ -127,7 +127,7 @@ export default function Pricing() {
               {loading ? (
                 <><span className="cta-spinner" />Redirection vers Stripe…</>
               ) : user ? (
-                "Commencer l'essai gratuit, 14 jours →"
+                "Commencer l'essai gratuit, 7 jours →"
               ) : (
                 "Créer un compte gratuit →"
               )}

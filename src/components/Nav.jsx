@@ -38,6 +38,9 @@ export default function Nav() {
         <div className="nav-left">
           {user && (
             <>
+              <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+                <img src="/favicon.png" width="66" height="66" alt="Qovee" style={{ display: "block" }} />
+              </Link>
               <Link
                 to="/creer"
                 className={`nav-link${isCreer ? " nav-link-active" : ""}`}
@@ -56,7 +59,9 @@ export default function Nav() {
 
         {/* CENTRE */}
         <Link to="/" className="nav-brand">
-          <span className="nav-name">Qovee</span>
+          <span className="nav-name">
+            <span className="nav-name-q">Q</span>ovee
+          </span>
         </Link>
 
         {/* DROITE */}
@@ -84,7 +89,7 @@ export default function Nav() {
             </>
           ) : (
             <Link to="/pricing" className="nav-badge">
-              Essai 14 jours
+              Essai 7 jours
             </Link>
           )}
         </div>
