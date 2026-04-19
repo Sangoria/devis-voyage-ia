@@ -1,3 +1,28 @@
+/* ── Legal prose (react-markdown) ───────────────────────────────────── */
+.legal-prose h1, .legal-prose h2, .legal-prose h3 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  color: #1A3040;
+  margin: 2rem 0 0.75rem;
+  line-height: 1.2;
+}
+.legal-prose h1 { font-size: 1.75rem; margin-top: 0; }
+.legal-prose h2 { font-size: 1.25rem; }
+.legal-prose h3 { font-size: 1.05rem; }
+.legal-prose p  { margin-bottom: 1rem; }
+.legal-prose ul, .legal-prose ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+.legal-prose li { margin-bottom: 0.4rem; }
+.legal-prose a  { color: #C4714A; text-underline-offset: 3px; }
+.legal-prose strong { font-weight: 700; }
+.legal-prose hr { border: none; border-top: 1px solid #E8E0D5; margin: 2rem 0; }
+.legal-prose blockquote {
+  border-left: 3px solid #C4714A;
+  padding-left: 1rem;
+  color: #8A9BA8;
+  font-style: italic;
+  margin: 1rem 0;
+}
+
 /* ── Reset & tokens ─────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1946,13 +1971,27 @@ input[type="date"] { padding-left: 2.5rem; }
    PAGE PRICING
 ══════════════════════════════════════════════════════════════════════════════ */
 .pricing-main {
-  max-width: 493px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 3.5rem 1.5rem 5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2rem;
+}
+
+.pricing-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .pricing-cards-grid {
+    grid-template-columns: 1fr;
+    max-width: 493px;
+  }
 }
 
 .pricing-success-banner {
@@ -1986,7 +2025,7 @@ input[type="date"] { padding-left: 2.5rem; }
   margin-top: 0.5rem;
 }
 
-/* Carte centrale */
+/* Cartes */
 .pricing-card {
   width: 100%;
   background: var(--surface);
@@ -1998,6 +2037,40 @@ input[type="date"] { padding-left: 2.5rem; }
   flex-direction: column;
   align-items: center;
   gap: 1.25rem;
+  position: relative;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.pricing-card:hover {
+  box-shadow: 0 12px 40px rgba(196, 113, 74, 0.28);
+  transform: translateY(-3px);
+}
+
+.pricing-card--popular {
+  box-shadow: 0 12px 40px rgba(196, 113, 74, 0.3);
+}
+
+.pricing-popular-badge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--terra);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.9rem;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.pricing-plan-desc {
+  font-size: 0.88rem;
+  color: var(--muted);
+  text-align: center;
+  margin: -0.5rem 0 0;
 }
 
 .pricing-plan-label {
@@ -2380,16 +2453,78 @@ input[type="date"] { padding-left: 2.5rem; }
   padding: 96px 0;
   text-align: center;
 }
+.lp-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+}
+
 .lp-card {
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
+  gap: 1.5rem;
   background: rgba(255,255,255,0.04);
   border: 2px solid var(--terra);
   border-radius: 20px;
-  padding: 3rem 3.5rem;
-  min-width: 407px;
+  padding: 2.5rem 2rem;
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.lp-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(196,113,74,0.25);
+}
+.lp-card--popular {
+  box-shadow: 0 8px 32px rgba(196,113,74,0.3);
+}
+.lp-card--popular:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(196,113,74,0.45);
+}
+
+.lp-popular-badge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--terra);
+  color: var(--cream);
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.9rem;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.lp-plan-name {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.lp-plan-desc {
+  font-size: 0.85rem;
+  color: var(--mist);
+  text-align: center;
+  margin: -0.75rem 0 0;
+}
+
+.lp-trial-note {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--mist);
+  margin-top: 1.5rem;
+  font-family: var(--font-serif);
+  font-style: italic;
 }
 .lp-price {
   font-family: var(--font-sans);
@@ -2530,15 +2665,16 @@ input[type="date"] { padding-left: 2.5rem; }
 .site-footer-links {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
 }
 .site-footer-link {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 0.9375rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
   color: var(--mist);
   text-decoration: none;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
   transition: color 0.2s;
 }
 .site-footer-link:hover { color: var(--sand); }
@@ -2557,7 +2693,8 @@ input[type="date"] { padding-left: 2.5rem; }
   .pain-cards { grid-template-columns: repeat(2, 1fr); }
   .how-steps  { grid-template-columns: 1fr; gap: 2.5rem; }
   .why-pillars { grid-template-columns: 1fr; }
-  .lp-card { min-width: unset; width: 100%; padding: 2rem 1.5rem; }
+  .lp-grid { grid-template-columns: 1fr; }
+  .lp-card { width: 100%; padding: 2rem 1.5rem; }
   .site-footer-inner { flex-direction: column; text-align: center; gap: 1.25rem; }
   .hero-title { font-size: clamp(2.25rem, 8vw, 3rem); }
 }

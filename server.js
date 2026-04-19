@@ -153,9 +153,18 @@ app.post("/api/generate-quote", async (req, res) => {
 });
 
 // ── POST /api/create-checkout-session ────────────────────────────────────
+const PRICE_IDS = {
+  solo   : process.env.STRIPE_PRICE_SOLO,
+  pro    : process.env.STRIPE_PRICE_PRO,
+  studio : process.env.STRIPE_PRICE_STUDIO,
+};
+
 app.post("/api/create-checkout-session", async (req, res) => {
-  const { userId, userEmail } = req.body;
+  const { userId, userEmail, plan = "solo" } = req.body;
   if (!userId) return res.status(400).json({ error: "userId manquant" });
+
+  const priceId = PRICE_IDS[plan];
+  if (!priceId) return res.status(400).json({ error: `Plan inconnu : ${plan}` });
 
   const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 
@@ -164,15 +173,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
       mode                 : "subscription",
       payment_method_types : ["card"],
       customer_email       : userEmail || undefined,
-      line_items: [{
-        price_data: {
-          currency     : "eur",
-          product_data : { name: "Qovee — Abonnement mensuel" },
-          unit_amount  : 2900,
-          recurring    : { interval: "month" },
-        },
-        quantity: 1,
-      }],
+      line_items           : [{ price: priceId, quantity: 1 }],
       subscription_data: {
         trial_period_days : 7,
         metadata          : { user_id: userId },

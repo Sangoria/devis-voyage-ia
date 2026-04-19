@@ -3,11 +3,44 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import Nav from "../components/Nav";
 import { useAuth } from "../contexts/AuthContext";
 
-const FEATURES = [
-  "Devis illimités",
-  "Export PDF professionnel",
-  "Historique complet des devis",
-  "Support humain",
+const PLANS = [
+  {
+    id       : "solo",
+    name     : "Solo",
+    price    : 29,
+    desc     : "Pour les agents indépendants",
+    features : [
+      "1 utilisateur",
+      "20 devis premium/mois",
+      "Export PDF pro",
+      "Support humain",
+    ],
+  },
+  {
+    id       : "pro",
+    name     : "Pro",
+    price    : 59,
+    desc     : "Pour les petites agences",
+    popular  : true,
+    features : [
+      "3 utilisateurs",
+      "Devis illimités",
+      "Branding agence sur PDF",
+      "Support prioritaire",
+    ],
+  },
+  {
+    id       : "studio",
+    name     : "Studio",
+    price    : 99,
+    desc     : "Pour les agences établies",
+    features : [
+      "5+ utilisateurs",
+      "Multi-users",
+      "Branding agence sur PDF",
+      "Support prioritaire dédié",
+    ],
+  },
 ];
 
 export default function Pricing() {
@@ -18,21 +51,20 @@ export default function Pricing() {
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState("");
 
-  // Succès après retour de Stripe Checkout
   const checkoutSuccess = new URLSearchParams(location.search).get("checkout") === "success";
 
-  async function handleSubscribe() {
+  async function handleSubscribe(planId) {
     if (!user) {
       navigate("/signup");
       return;
     }
-    setLoading(true);
+    setLoading(planId);
     setError("");
     try {
       const res = await fetch("/api/create-checkout-session", {
         method  : "POST",
         headers : { "Content-Type": "application/json" },
-        body    : JSON.stringify({ userId: user.id, userEmail: user.email }),
+        body    : JSON.stringify({ userId: user.id, userEmail: user.email, plan: planId }),
       });
       const { url, error: apiError } = await res.json();
       if (apiError) throw new Error(apiError);
@@ -44,7 +76,7 @@ export default function Pricing() {
   }
 
   async function handlePortal() {
-    setLoading(true);
+    setLoading("portal");
     setError("");
     try {
       const res = await fetch("/api/customer-portal", {
@@ -69,82 +101,93 @@ export default function Pricing() {
 
         {checkoutSuccess && (
           <div className="pricing-success-banner">
-            ✓ Abonnement activé, bienvenue dans Qovee Pro&nbsp;!
+            ✓ Abonnement activé, bienvenue dans Qovee&nbsp;!
           </div>
         )}
 
         <div className="pricing-header">
-          <h1 className="pricing-title">Un tarif simple.</h1>
+          <h1 className="pricing-title">Choisissez votre formule.</h1>
           <p className="pricing-sub">
-            Pour les agents qui veulent travailler mieux, pas plus vite.
+            7 jours d'essai gratuit · Annulation à tout moment
           </p>
         </div>
 
-        <div className="pricing-card">
-
-          <div className="pricing-plan-label">Pro</div>
-
-          <div className="pricing-price-block">
-            <span className="pricing-currency">€</span>
-            <span className="pricing-amount">29</span>
-            <span className="pricing-period">/mois</span>
-          </div>
-
-          <div className="pricing-trial-pill">7 jours d'essai gratuit</div>
-
-          <ul className="pricing-features-list">
-            {FEATURES.map((f) => (
-              <li key={f} className="pricing-feature-item">
-                <svg viewBox="0 0 16 16" fill="none" width="15" height="15">
-                  <circle cx="8" cy="8" r="7" stroke="#B8965A" strokeWidth="1.5"/>
-                  <path d="M5 8l2.5 2.5L11 5.5" stroke="#B8965A" strokeWidth="1.5"
-                    strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                {f}
-              </li>
-            ))}
-          </ul>
-
-          {error && <div className="pricing-error">{error}</div>}
-
-          {isSubscribed ? (
-            <div className="pricing-subscribed-block">
-              <div className="pricing-active-badge">✓ Abonnement actif</div>
-              <button
-                className="pricing-portal-btn"
-                onClick={handlePortal}
-                disabled={loading}
-              >
-                {loading ? "Redirection…" : "Gérer mon abonnement →"}
-              </button>
-            </div>
-          ) : (
-            <button
-              className="pricing-cta-btn"
-              onClick={handleSubscribe}
-              disabled={loading}
+        <div className="pricing-cards-grid">
+          {PLANS.map((plan) => (
+            <div
+              key={plan.id}
+              className={`pricing-card${plan.popular ? " pricing-card--popular" : ""}`}
             >
-              {loading ? (
-                <><span className="cta-spinner" />Redirection vers Stripe…</>
-              ) : user ? (
-                "Commencer l'essai gratuit, 7 jours →"
-              ) : (
-                "Créer un compte gratuit →"
+              {plan.popular && (
+                <div className="pricing-popular-badge">Le plus choisi</div>
               )}
-            </button>
-          )}
 
-          {!user && (
-            <p className="pricing-login-note">
-              Déjà un compte ?{" "}
-              <Link to="/login" className="pricing-login-link">Se connecter</Link>
-            </p>
-          )}
+              <div className="pricing-plan-label">{plan.name}</div>
+              <p className="pricing-plan-desc">{plan.desc}</p>
 
-          <p className="pricing-guarantee">
-            Annulation à tout moment · Sans engagement
-          </p>
+              <div className="pricing-price-block">
+                <span className="pricing-currency">€</span>
+                <span className="pricing-amount">{plan.price}</span>
+                <span className="pricing-period">/mois</span>
+              </div>
+
+              <div className="pricing-trial-pill">7 jours d'essai gratuit</div>
+
+              <ul className="pricing-features-list">
+                {plan.features.map((f) => (
+                  <li key={f} className="pricing-feature-item">
+                    <svg viewBox="0 0 16 16" fill="none" width="15" height="15">
+                      <circle cx="8" cy="8" r="7" stroke="#B8965A" strokeWidth="1.5"/>
+                      <path d="M5 8l2.5 2.5L11 5.5" stroke="#B8965A" strokeWidth="1.5"
+                        strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+
+              {error && <div className="pricing-error">{error}</div>}
+
+              {isSubscribed ? (
+                <div className="pricing-subscribed-block">
+                  <div className="pricing-active-badge">✓ Abonnement actif</div>
+                  <button
+                    className="pricing-portal-btn"
+                    onClick={handlePortal}
+                    disabled={!!loading}
+                  >
+                    {loading === "portal" ? "Redirection…" : "Gérer mon abonnement →"}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  className="pricing-cta-btn"
+                  onClick={() => handleSubscribe(plan.id)}
+                  disabled={!!loading}
+                >
+                  {loading === plan.id ? (
+                    <><span className="cta-spinner" />Redirection vers Stripe…</>
+                  ) : user ? (
+                    "Commencer l'essai gratuit →"
+                  ) : (
+                    "Créer un compte gratuit →"
+                  )}
+                </button>
+              )}
+
+              {!user && (
+                <p className="pricing-login-note">
+                  Déjà un compte ?{" "}
+                  <Link to="/login" className="pricing-login-link">Se connecter</Link>
+                </p>
+              )}
+            </div>
+          ))}
         </div>
+
+        <p className="pricing-guarantee" style={{ textAlign: "center", marginTop: "2rem" }}>
+          Sans engagement · Annulation à tout moment
+        </p>
 
         <p className="pricing-free-note">
           <strong>Essai sans carte</strong> · 3 devis gratuits pour tester Qovee avant de vous abonner.
@@ -155,7 +198,7 @@ export default function Pricing() {
       <footer className="footer">
         <span>Qovee © 2025</span>
         <span className="footer-dot">·</span>
-        <span>29 €/mois</span>
+        <span>À partir de 29 €/mois</span>
       </footer>
     </div>
   );

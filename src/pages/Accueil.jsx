@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Nav from "../components/Nav";
 import { useAuth } from "../contexts/AuthContext";
 import "../App.css";
@@ -145,22 +145,50 @@ export default function Accueil() {
       {/* ── Pricing ── */}
       <section className="landing-pricing">
         <div className="landing-inner">
-          <div className="lp-card">
-            <div className="lp-price">29<span className="lp-currency">€</span><span className="lp-period">/mois</span></div>
-            <ul className="lp-features">
-              {["Devis illimités", "Export PDF pro", "Historique des devis", "Support humain direct"].map((f) => (
-                <li key={f} className="lp-feature">
-                  <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
-                    <path d="M3 8l3.5 3.5L13 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <button className="lp-cta" onClick={handleCta}>
-              Commencer l'essai gratuit, 7 jours sans carte bancaire
-            </button>
+          <div className="lp-grid">
+            {[
+              {
+                name  : "Solo",
+                price : 29,
+                desc  : "1 utilisateur · 20 devis/mois",
+                feats : ["20 devis premium/mois", "Export PDF pro", "Historique des devis", "Support humain"],
+              },
+              {
+                name    : "Pro",
+                price   : 59,
+                desc    : "3 utilisateurs · Devis illimités",
+                popular : true,
+                feats   : ["Devis illimités", "Branding agence sur PDF", "Historique des devis", "Support prioritaire"],
+              },
+              {
+                name  : "Studio",
+                price : 99,
+                desc  : "5+ utilisateurs · Multi-agences",
+                feats : ["Devis illimités", "Multi-users", "Branding agence sur PDF", "Support prioritaire dédié"],
+              },
+            ].map((plan) => (
+              <div key={plan.name} className={`lp-card${plan.popular ? " lp-card--popular" : ""}`}>
+                {plan.popular && <div className="lp-popular-badge">Le plus choisi</div>}
+                <div className="lp-plan-name">{plan.name}</div>
+                <div className="lp-price">{plan.price}<span className="lp-currency">€</span><span className="lp-period">/mois</span></div>
+                <p className="lp-plan-desc">{plan.desc}</p>
+                <ul className="lp-features">
+                  {plan.feats.map((f) => (
+                    <li key={f} className="lp-feature">
+                      <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
+                        <path d="M3 8l3.5 3.5L13 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <button className="lp-cta" onClick={handleCta}>
+                  Commencer l'essai gratuit →
+                </button>
+              </div>
+            ))}
           </div>
+          <p className="lp-trial-note">7 jours d'essai gratuit · Sans carte · Annulation à tout moment</p>
         </div>
       </section>
 
@@ -184,9 +212,18 @@ export default function Accueil() {
             <span className="site-footer-name">Qovee</span>
           </div>
           <div className="site-footer-links">
-            <a href="#" className="site-footer-link">Mentions légales</a>
-            <a href="#" className="site-footer-link">CGV</a>
-            <a href="#" className="site-footer-link">Contact</a>
+            {[
+              { to: "/mentions-legales", label: "Mentions légales" },
+              { to: "/confidentialite",  label: "Confidentialité" },
+              { to: "/cookies",          label: "Cookies" },
+              { to: "/cgu",              label: "CGU" },
+              { to: "/cgv",              label: "CGV" },
+            ].map(({ to, label }, i, arr) => (
+              <span key={to} style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+                <Link to={to} className="site-footer-link">{label}</Link>
+                {i < arr.length - 1 && <span style={{ color: "#8A9BA8" }}>·</span>}
+              </span>
+            ))}
           </div>
           <p className="site-footer-baseline">Décris le voyage. Qovee rédige le devis.</p>
         </div>
