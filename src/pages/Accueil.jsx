@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Nav from "../components/Nav";
+import Footer from "../components/Footer";
 import { useAuth } from "../contexts/AuthContext";
 import "../App.css";
 
@@ -44,8 +45,26 @@ function FaqItem({ q, a }) {
 export default function Accueil() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [loadingPlan, setLoadingPlan] = useState(null);
 
   const handleCta = () => navigate(user ? "/creer" : "/signup");
+
+  async function handleSubscribe(planId) {
+    if (!user) { navigate("/signup"); return; }
+    setLoadingPlan(planId);
+    try {
+      const res = await fetch("/api/create-checkout-session", {
+        method  : "POST",
+        headers : { "Content-Type": "application/json" },
+        body    : JSON.stringify({ userId: user.id, userEmail: user.email, plan: planId }),
+      });
+      const { url, error } = await res.json();
+      if (error) throw new Error(error);
+      window.location.href = url;
+    } catch {
+      setLoadingPlan(null);
+    }
+  }
 
   return (
     <div className="app">
@@ -86,10 +105,10 @@ export default function Accueil() {
           </h2>
           <div className="pain-cards">
             {[
-              { icon: "✈", label: "Vols",        desc: "Comparateurs, disponibilités, escales…" },
-              { icon: "🏨", label: "Hôtels",      desc: "Catégories, emplacements, photos…" },
-              { icon: "🗺", label: "Excursions",  desc: "Prestataires, horaires, tarifs groupe…" },
-              { icon: "🚐", label: "Transferts",  desc: "Navettes, taxis, distances à calculer…" },
+              { icon: "✈", label: "Vols",        desc: "Aller-retours, escales, bagages… tout à recopier proprement." },
+              { icon: "🏨", label: "Hôtels",      desc: "Descriptions, catégories, inclusions… extraits un par un." },
+              { icon: "🗺", label: "Excursions",  desc: "Caler les activités avec le planning vols, coordonner les prestataires…" },
+              { icon: "🚐", label: "Transferts",  desc: "Arrivées, départs, distances… synchronisés à la main depuis 3 onglets." },
             ].map((c) => (
               <div key={c.label} className="pain-card">
                 <span className="pain-card-icon">{c.icon}</span>
@@ -148,23 +167,47 @@ export default function Accueil() {
           <div className="lp-grid">
             {[
               {
+                id    : "solo",
                 name  : "Solo",
                 price : 29,
                 desc  : "1 utilisateur · 20 devis/mois",
-                feats : ["20 devis premium/mois", "Export PDF pro", "Historique des devis", "Support humain"],
+                feats : [
+                  { text: "20 devis premium/mois",   included: true  },
+                  { text: "Export PDF pro",            included: true  },
+                  { text: "Historique des devis",      included: true  },
+                  { text: "Branding agence sur PDF",   included: false },
+                  { text: "Multi-utilisateurs",        included: false },
+                  { text: "Support humain",            included: true  },
+                ],
               },
               {
+                id      : "pro",
                 name    : "Pro",
                 price   : 59,
                 desc    : "3 utilisateurs · Devis illimités",
                 popular : true,
-                feats   : ["Devis illimités", "Branding agence sur PDF", "Historique des devis", "Support prioritaire"],
+                feats   : [
+                  { text: "Devis illimités",           included: true  },
+                  { text: "Export PDF pro",            included: true  },
+                  { text: "Historique des devis",      included: true  },
+                  { text: "Branding agence sur PDF",   included: true  },
+                  { text: "Multi-utilisateurs",        included: false },
+                  { text: "Support prioritaire",       included: true  },
+                ],
               },
               {
+                id    : "studio",
                 name  : "Studio",
                 price : 99,
                 desc  : "5+ utilisateurs · Multi-agences",
-                feats : ["Devis illimités", "Multi-users", "Branding agence sur PDF", "Support prioritaire dédié"],
+                feats : [
+                  { text: "Devis illimités",              included: true },
+                  { text: "Export PDF pro",               included: true },
+                  { text: "Historique des devis",         included: true },
+                  { text: "Branding agence sur PDF",      included: true },
+                  { text: "Multi-utilisateurs",           included: true },
+                  { text: "Support prioritaire dédié",    included: true },
+                ],
               },
             ].map((plan) => (
               <div key={plan.name} className={`lp-card${plan.popular ? " lp-card--popular" : ""}`}>
@@ -174,16 +217,22 @@ export default function Accueil() {
                 <p className="lp-plan-desc">{plan.desc}</p>
                 <ul className="lp-features">
                   {plan.feats.map((f) => (
-                    <li key={f} className="lp-feature">
-                      <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
-                        <path d="M3 8l3.5 3.5L13 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      {f}
+                    <li key={f.text} className={`lp-feature${f.included ? "" : " lp-feature--off"}`}>
+                      {f.included ? (
+                        <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
+                          <path d="M3 8l3.5 3.5L13 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      ) : (
+                        <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
+                          <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                      )}
+                      {f.text}
                     </li>
                   ))}
                 </ul>
-                <button className="lp-cta" onClick={handleCta}>
-                  Commencer l'essai gratuit →
+                <button className="lp-cta" onClick={() => handleSubscribe(plan.id)} disabled={loadingPlan === plan.id}>
+                  {loadingPlan === plan.id ? "Redirection…" : "Commencer l'essai gratuit →"}
                 </button>
               </div>
             ))}
@@ -204,30 +253,7 @@ export default function Accueil() {
         </div>
       </section>
 
-      {/* ── Footer ── */}
-      <footer className="site-footer">
-        <div className="site-footer-inner">
-          <div className="site-footer-brand">
-            <img src="/favicon.png" width="22" height="22" alt="Qovee" />
-            <span className="site-footer-name">Qovee</span>
-          </div>
-          <div className="site-footer-links">
-            {[
-              { to: "/mentions-legales", label: "Mentions légales" },
-              { to: "/confidentialite",  label: "Confidentialité" },
-              { to: "/cookies",          label: "Cookies" },
-              { to: "/cgu",              label: "CGU" },
-              { to: "/cgv",              label: "CGV" },
-            ].map(({ to, label }, i, arr) => (
-              <span key={to} style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
-                <Link to={to} className="site-footer-link">{label}</Link>
-                {i < arr.length - 1 && <span style={{ color: "#8A9BA8" }}>·</span>}
-              </span>
-            ))}
-          </div>
-          <p className="site-footer-baseline">Décris le voyage. Qovee rédige le devis.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import Nav from "../components/Nav";
 import DevisResult from "../components/DevisResult";
 import { generatePdf   } from "../services/generatePdf";
@@ -51,7 +51,7 @@ function rowToFormData(row) {
 }
 
 export default function MesDevis() {
-  const { user, refreshProfile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const navigate  = useNavigate();
   const location  = useLocation();
 
@@ -126,7 +126,7 @@ export default function MesDevis() {
   async function downloadPdf(row, e) {
     e.stopPropagation();
     if (row.generated_content) {
-      await generatePdf(row.generated_content, rowToFormData(row));
+      await generatePdf(row.generated_content, rowToFormData(row), profile);
     }
   }
 
@@ -362,7 +362,7 @@ export default function MesDevis() {
                     devis={selected.generated_content}
                     onReset={() => setSelected(null)}
                     onModify={() => { setSelected(null); navigate("/"); }}
-                    onPdf={async () => await generatePdf(selected.generated_content, rowToFormData(selected))}
+                    onPdf={async () => await generatePdf(selected.generated_content, rowToFormData(selected), profile)}
                   />
                 </div>
               ) : (
@@ -375,10 +375,32 @@ export default function MesDevis() {
         </div>
       )}
 
-      <footer className="footer">
-        <span>Qovee © 2025</span>
-        <span className="footer-dot">·</span>
-        <span>29 €/mois</span>
+      <footer className="site-footer">
+        <div className="site-footer-inner">
+          <div className="site-footer-brand">
+            <span className="site-footer-name">
+              <span className="site-footer-name-q">Q</span>ovee
+            </span>
+          </div>
+          <div className="site-footer-links">
+            {[
+              { to: "/mentions-legales", label: "Mentions légales" },
+              { to: "/confidentialite",  label: "Confidentialité" },
+              { to: "/cookies",          label: "Cookies" },
+              { to: "/cgu",              label: "CGU" },
+              { to: "/cgv",              label: "CGV" },
+            ].map(({ to, label }, i, arr) => (
+              <span key={to} style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+                <Link to={to} className="site-footer-link">{label}</Link>
+                {i < arr.length - 1 && <span style={{ color: "#8A9BA8" }}>·</span>}
+              </span>
+            ))}
+          </div>
+          <p className="site-footer-baseline">
+            <span style={{ color: "#fff" }}>Décris le voyage. </span>
+            <span style={{ color: "var(--terra)" }}>Qovee rédige le devis.</span>
+          </p>
+        </div>
       </footer>
     </div>
   );

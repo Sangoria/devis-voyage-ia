@@ -3,14 +3,22 @@ import autoTable from "jspdf-autotable";
 
 // ── Palette Qovee ────────────────────────────────────────────────────
 const OCEAN  = [26,  48,  64];
-const TERRA  = [196, 113, 74];
 const GOLD   = [184, 150, 90];
 const SAND   = [242, 235, 224];
 const MIST   = [138, 155, 168];
 const CREAM  = [250, 247, 242];
 const BORDER = [228, 217, 206];
 const WHITE  = [255, 255, 255];
-const TERRA_L = [245, 230, 223];
+
+function hexToRgb(hex) {
+  const h = hex.replace("#", "");
+  const n = parseInt(h, 16);
+  return [n >> 16 & 255, n >> 8 & 255, n & 255];
+}
+
+function lighten(rgb, amount = 0.75) {
+  return rgb.map((c) => Math.round(c + (255 - c) * amount));
+}
 
 // ── Constantes de mise en page ───────────────────────────────────────
 const W      = 210;
@@ -94,7 +102,7 @@ async function loadImageAsDataUrl(url) {
 }
 
 // ── Générateur principal ─────────────────────────────────────────────
-export async function generatePdf(devis, formData = {}) {
+export async function generatePdf(devis, formData = {}, profile = {}) {
   const {
     titre             = "Voyage sur-mesure",
     resume            = "",
@@ -117,6 +125,9 @@ export async function generatePdf(devis, formData = {}) {
     budgetMode       = "total",
   } = formData;
 
+  const TERRA   = hexToRgb(profile?.accent_color || "#C4714A");
+  const TERRA_L = lighten(TERRA, 0.75);
+
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
   const ref   = `QOV-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`;
@@ -133,29 +144,54 @@ export async function generatePdf(devis, formData = {}) {
 
   // ── EN-TÊTE PAGE 1 ──────────────────────────────────────────────────
 
+  const agencyName  = profile?.agency_name   || "";
+  const contactName = profile?.contact_name  || "";
+  const phone       = profile?.phone         || "";
+  const website     = profile?.website       || "";
+  const logoUrl     = profile?.logo_url      || null;
+
   // Fond Ocean
   doc.setFillColor(...OCEAN);
   doc.rect(0, 0, W, 62, "F");
 
-  // Bande Terracotta en bas du header
+  // Bande accent en bas du header
   doc.setFillColor(...TERRA);
   doc.rect(0, 59, W, 3, "F");
 
-  // Logo favicon
-  const logoDataUrl = await loadImageAsDataUrl("/favicon.png");
-  doc.addImage(logoDataUrl, "PNG", MARGIN, 11, 26, 26);
+  // Logo agence (fallback: favicon Qovee)
+  try {
+    const src = logoUrl || "/favicon.png";
+    const imgData = await loadImageAsDataUrl(src);
+    doc.addImage(imgData, "PNG", MARGIN, 9, 26, 26);
+  } catch {
+    try {
+      const fb = await loadImageAsDataUrl("/favicon.png");
+      doc.addImage(fb, "PNG", MARGIN, 9, 26, 26);
+    } catch { /* pas de logo */ }
+  }
 
-  // Wordmark QOVEE
+  const nameX = MARGIN + 30;
+
+  // Nom de l'agence
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
+  doc.setFontSize(13);
   doc.setTextColor(...WHITE);
-  doc.text("QOVEE", MARGIN + 18, 21);
+  doc.text(agencyName || "Mon Agence", nameX, 19);
 
-  // Baseline
+  // Ligne contact : responsable · téléphone · site web
+  const contactParts = [contactName, phone, website].filter(Boolean);
+  if (contactParts.length > 0) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(...MIST);
+    doc.text(contactParts.join("  \u00B7  "), nameX, 27);
+  }
+
+  // Mention Qovee discrète
   doc.setFont("helvetica", "italic");
-  doc.setFontSize(7.5);
-  doc.setTextColor(...MIST);
-  doc.text("Decris le voyage. Qovee redige le devis.", MARGIN + 18, 27);
+  doc.setFontSize(6);
+  doc.setTextColor(60, 85, 100);
+  doc.text("Propulse par Qovee", nameX, 34);
 
   // "Proposition de voyage"
   doc.setFont("helvetica", "bold");
@@ -509,9 +545,15 @@ export async function generatePdf(devis, formData = {}) {
 
   // ── MENTIONS LÉGALES ─────────────────────────────────────────────────
 
+  const atoutNum = profile?.atout_france_num   || null;
+  const garantie = profile?.garantie_financiere || "APST";
+  const rcpAssur = profile?.rcp_assurance       || "AXA France";
+
   const legal = [
-    "Immatriculation Atout France : IM075180035 - Garantie financiere APST (11 rue de Milan, 75009 Paris).",
-    "Assurance Responsabilite Civile Professionnelle souscrite aupres d'AXA France, conformement a l'article L.211-1 du Code du Tourisme.",
+    ...(atoutNum
+      ? [`Immatriculation Atout France : ${atoutNum} - Garantie financiere ${garantie}.`]
+      : []),
+    `Assurance Responsabilite Civile Professionnelle souscrite aupres de ${rcpAssur}, conformement a l'article L.211-1 du Code du Tourisme.`,
     "Ce devis est soumis a nos Conditions Generales de Vente disponibles en agence ou sur simple demande.",
     "Droit de retractation : conformement a l'article L.221-28 du Code de la consommation, les forfaits touristiques sont exclus du droit de retractation.",
   ];

@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
-function UserAvatar({ name }) {
+function UserAvatar({ name, avatarUrl }) {
+  if (avatarUrl) {
+    return <img src={avatarUrl} alt={name} className="nav-avatar nav-avatar--img" />;
+  }
   const initials = name ? name.slice(0, 2).toUpperCase() : "?";
   return <span className="nav-avatar">{initials}</span>;
 }
@@ -13,9 +16,10 @@ export default function Nav() {
   const location  = useLocation();
   const [scrolled, setScrolled] = useState(false);
 
-  const isCreer    = location.pathname === "/creer";
-  const isMesDevis = location.pathname === "/mes-devis";
-  const isPricing  = location.pathname === "/pricing";
+  const isCreer     = location.pathname === "/creer";
+  const isMesDevis  = location.pathname === "/mes-devis";
+  const isMonCompte = location.pathname === "/mon-compte";
+  const isPricing   = location.pathname === "/pricing";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -38,8 +42,11 @@ export default function Nav() {
         <div className="nav-left">
           {user && (
             <>
-              <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-                <img src="/favicon.png" width="66" height="66" alt="Qovee" style={{ display: "block" }} />
+              <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="nav-home-icon" title="Accueil">
+                <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+                  <path d="M3 9.5L12 2l9 7.5V20a1.5 1.5 0 01-1.5 1.5H15v-6h-6v6H4.5A1.5 1.5 0 013 20V9.5z"
+                    stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </Link>
               <Link
                 to="/creer"
@@ -52,6 +59,12 @@ export default function Nav() {
                 className={`nav-link${isMesDevis ? " nav-link-active" : ""}`}
               >
                 Mes devis
+              </Link>
+              <Link
+                to="/mon-compte"
+                className={`nav-link${isMonCompte ? " nav-link-active" : ""}`}
+              >
+                Mon compte
               </Link>
             </>
           )}
@@ -76,10 +89,10 @@ export default function Nav() {
                   Passer Pro
                 </Link>
               )}
-              <div className="nav-user">
-                <UserAvatar name={displayName} />
+              <Link to="/mon-compte" className="nav-user" style={{ textDecoration: "none" }}>
+                <UserAvatar name={displayName} avatarUrl={profile?.avatar_url} />
                 <span className="nav-agency">{displayName}</span>
-              </div>
+              </Link>
               <button className="nav-signout" onClick={handleSignOut} title="Déconnexion">
                 <svg viewBox="0 0 18 18" fill="none" width="15" height="15">
                   <path d="M7 16H3a1 1 0 01-1-1V3a1 1 0 011-1h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -88,9 +101,10 @@ export default function Nav() {
               </button>
             </>
           ) : (
-            <Link to="/pricing" className="nav-badge">
-              Essai 7 jours
-            </Link>
+            <>
+              <Link to="/login"  className="nav-link">Se connecter</Link>
+              <Link to="/signup" className="nav-btn-pro">S'inscrire</Link>
+            </>
           )}
         </div>
 

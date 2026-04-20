@@ -35,6 +35,9 @@ const FORM_INIT = {
   budget: "", budgetMode: "total",
   dateDebut: "", dateFin: "", datesFlexibles: false,
   typesExperience: [], contraintes: "", demandeClient: "",
+  compagnieAerienne: "", prixVols: "",
+  nomHotel: "", etoilesHotel: "", prixHotel: "",
+  transfertInclus: false, prixTransfert: "", nomTransporteur: "",
 };
 
 export default function CreerDevis() {
@@ -118,7 +121,7 @@ export default function CreerDevis() {
   };
 
   const handleModify = () => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  const handlePdf    = async () => { if (devis) await generatePdf(devis, form); };
+  const handlePdf    = async () => { if (devis) await generatePdf(devis, form, profile); };
 
   return (
     <div className="app">
@@ -131,14 +134,13 @@ export default function CreerDevis() {
           {/* Section 1 : Demande client */}
           <div className="demande-block">
             <div className="demande-header">
-              <span className="demande-badge">Killer feature</span>
               <span className="demande-title">Colle ici la demande de ton client</span>
             </div>
             <div className="demande-field">
               <textarea
                 id="demandeClient" name="demandeClient"
                 value={form.demandeClient} onChange={handleChange}
-                placeholder="Ex : Couple, Bali, 12 jours, budget 4 000€, plage et culture. Le client veut du repos en bord de mer avec quelques excursions culturelles."
+                placeholder="Ex : Couple, Bali, 12 jours du 14 au 26 juin, budget 5 000€. On veut du calme et de la nature, quelques jours à Ubud pour les rizières, puis fin de séjour à Seminyak côté mer. Pas d'hôtels trop touristiques. Un des deux supporte mal les longs vols, éviter les escales si possible."
                 rows={5} required
               />
             </div>
@@ -242,8 +244,15 @@ export default function CreerDevis() {
                       <rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" strokeWidth="1.5"/>
                       <path d="M3 9h14M7 3v2M13 3v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                     </svg>
-                    <input id="dateDebut" type="date" name="dateDebut"
-                      value={form.dateDebut} onChange={handleChange}/>
+                    <input id="dateDebut" type="text" name="dateDebut"
+                      value={form.dateDebut} onChange={handleChange}
+                      placeholder="jj/mm/aaaa" maxLength={10}
+                      onInput={(e) => {
+                        let v = e.target.value.replace(/\D/g, "");
+                        if (v.length >= 3) v = v.slice(0,2) + "/" + v.slice(2);
+                        if (v.length >= 6) v = v.slice(0,5) + "/" + v.slice(5,9);
+                        e.target.value = v;
+                      }}/>
                   </div>
                 </div>
                 <div className="form-field">
@@ -253,8 +262,15 @@ export default function CreerDevis() {
                       <rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" strokeWidth="1.5"/>
                       <path d="M3 9h14M7 3v2M13 3v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                     </svg>
-                    <input id="dateFin" type="date" name="dateFin"
-                      value={form.dateFin} onChange={handleChange}/>
+                    <input id="dateFin" type="text" name="dateFin"
+                      value={form.dateFin} onChange={handleChange}
+                      placeholder="jj/mm/aaaa" maxLength={10}
+                      onInput={(e) => {
+                        let v = e.target.value.replace(/\D/g, "");
+                        if (v.length >= 3) v = v.slice(0,2) + "/" + v.slice(2);
+                        if (v.length >= 6) v = v.slice(0,5) + "/" + v.slice(5,9);
+                        e.target.value = v;
+                      }}/>
                   </div>
                 </div>
 
@@ -268,29 +284,172 @@ export default function CreerDevis() {
                   </label>
                 </div>
 
-                {/* Type d'expérience */}
+
+                {/* ── Séparateur Vol ── */}
                 <div className="form-field span-2">
-                  <label>Type d'expérience recherchée</label>
-                  <div className="exp-chips">
-                    {TYPES_EXPERIENCE.map((exp) => {
-                      const active = form.typesExperience.includes(exp);
-                      return (
-                        <button key={exp} type="button"
-                          className={`exp-chip${active ? " active" : ""}`}
-                          onClick={() => toggleExperience(exp)}>
-                          {active && (
-                            <svg viewBox="0 0 12 12" fill="none" width="10" height="10">
-                              <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          )}
-                          {exp}
-                        </button>
-                      );
-                    })}
+                  <div className="affiner-section-title">
+                    <svg viewBox="0 0 20 20" fill="none" width="15" height="15">
+                      <path d="M3 13l3-3 3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M17 6H3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                    Vol
                   </div>
                 </div>
 
-                {/* Contraintes */}
+                <div className="form-field">
+                  <label htmlFor="compagnieAerienne">
+                    Compagnie aérienne
+                    <span className="label-optional"> · optionnel</span>
+                  </label>
+                  <div className="input-wrap">
+                    <svg className="input-icon" viewBox="0 0 20 20" fill="none">
+                      <path d="M3 13l3-3 3 3 5-5M17 6H3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <input id="compagnieAerienne" name="compagnieAerienne"
+                      value={form.compagnieAerienne} onChange={handleChange}
+                      placeholder="Ex : Air France, Emirates…"/>
+                  </div>
+                </div>
+
+                <div className="form-field">
+                  <label htmlFor="prixVols">
+                    Prix des vols
+                    <span className="label-optional"> · optionnel</span>
+                  </label>
+                  <div className="input-wrap">
+                    <svg className="input-icon" viewBox="0 0 20 20" fill="none">
+                      <rect x="2" y="5" width="16" height="12" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+                      <path d="M2 9h16" stroke="currentColor" strokeWidth="1.5"/>
+                    </svg>
+                    <input id="prixVols" type="number" name="prixVols"
+                      value={form.prixVols} onChange={handleChange}
+                      placeholder="1 570" min="0"/>
+                    <span className="input-suffix">€</span>
+                  </div>
+                </div>
+
+                {/* ── Séparateur Hôtel ── */}
+                <div className="form-field span-2">
+                  <div className="affiner-section-title">
+                    <svg viewBox="0 0 20 20" fill="none" width="15" height="15">
+                      <rect x="2" y="7" width="16" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+                      <path d="M6 7V5a4 4 0 018 0v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                    Hôtel
+                  </div>
+                </div>
+
+                <div className="form-field span-2">
+                  <label htmlFor="nomHotel">
+                    Nom de l'hôtel
+                    <span className="label-optional"> · optionnel</span>
+                  </label>
+                  <div className="input-wrap">
+                    <svg className="input-icon" viewBox="0 0 20 20" fill="none">
+                      <rect x="2" y="7" width="16" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+                      <path d="M6 7V5a4 4 0 018 0v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                    <input id="nomHotel" name="nomHotel"
+                      value={form.nomHotel} onChange={handleChange}
+                      placeholder="Ex : Alaya Resort Ubud"/>
+                  </div>
+                </div>
+
+                <div className="form-field">
+                  <label>
+                    Nombre d'étoiles
+                    <span className="label-optional"> · optionnel</span>
+                  </label>
+                  <div className="groupe-chips" style={{ marginTop: "0.25rem" }}>
+                    {["1","2","3","4","5"].map((n) => (
+                      <button key={n} type="button"
+                        className={`groupe-chip${form.etoilesHotel === n ? " active" : ""}`}
+                        onClick={() => setForm((f) => ({ ...f, etoilesHotel: f.etoilesHotel === n ? "" : n }))}>
+                        {"★".repeat(Number(n))}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="form-field">
+                  <label htmlFor="prixHotel">
+                    Prix de l'hôtel
+                    <span className="label-optional"> · optionnel</span>
+                  </label>
+                  <div className="input-wrap">
+                    <svg className="input-icon" viewBox="0 0 20 20" fill="none">
+                      <rect x="2" y="5" width="16" height="12" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+                      <path d="M2 9h16" stroke="currentColor" strokeWidth="1.5"/>
+                    </svg>
+                    <input id="prixHotel" type="number" name="prixHotel"
+                      value={form.prixHotel} onChange={handleChange}
+                      placeholder="155" min="0"/>
+                    <span className="input-suffix">€/nuit</span>
+                  </div>
+                </div>
+
+                {/* ── Séparateur Transfert ── */}
+                <div className="form-field span-2">
+                  <div className="affiner-section-title">
+                    <svg viewBox="0 0 20 20" fill="none" width="15" height="15">
+                      <rect x="1" y="7" width="14" height="8" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+                      <circle cx="5" cy="15" r="1.5" stroke="currentColor" strokeWidth="1.5"/>
+                      <circle cx="11" cy="15" r="1.5" stroke="currentColor" strokeWidth="1.5"/>
+                      <path d="M15 11h2a2 2 0 012 2v2h-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                    Transfert
+                  </div>
+                </div>
+
+                <div className="form-field span-2">
+                  <label className="checkbox-label">
+                    <input type="checkbox" name="transfertInclus" checked={form.transfertInclus}
+                      onChange={handleChange} className="checkbox-input"/>
+                    <span className="checkbox-box"/>
+                    <span className="checkbox-text">Transfert inclus</span>
+                  </label>
+                </div>
+
+                {form.transfertInclus && (
+                  <>
+                    <div className="form-field">
+                      <label htmlFor="nomTransporteur">Nom du transporteur</label>
+                      <div className="input-wrap">
+                        <svg className="input-icon" viewBox="0 0 20 20" fill="none">
+                          <circle cx="8" cy="6" r="3" stroke="currentColor" strokeWidth="1.5"/>
+                          <path d="M2 17a6 6 0 0112 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        </svg>
+                        <input id="nomTransporteur" name="nomTransporteur"
+                          value={form.nomTransporteur} onChange={handleChange}
+                          placeholder="Ex : Bali Private Driver"/>
+                      </div>
+                    </div>
+
+                    <div className="form-field">
+                      <label htmlFor="prixTransfert">Prix du transfert</label>
+                      <div className="input-wrap">
+                        <svg className="input-icon" viewBox="0 0 20 20" fill="none">
+                          <rect x="2" y="5" width="16" height="12" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+                          <path d="M2 9h16" stroke="currentColor" strokeWidth="1.5"/>
+                        </svg>
+                        <input id="prixTransfert" type="number" name="prixTransfert"
+                          value={form.prixTransfert} onChange={handleChange}
+                          placeholder="185" min="0"/>
+                        <span className="input-suffix">€</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Contraintes — toujours en dernier */}
+                <div className="form-field span-2" style={{ marginTop: "0.5rem" }}>
+                  <div className="affiner-section-title">
+                    <svg viewBox="0 0 20 20" fill="none" width="15" height="15">
+                      <path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm0 4v4m0 4h.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                    Contraintes
+                  </div>
+                </div>
                 <div className="form-field span-2">
                   <label htmlFor="contraintes">
                     Contraintes particulières
@@ -301,6 +460,7 @@ export default function CreerDevis() {
                     placeholder="Ex : PMR, régime végétarien, peur de l'avion, allergie..."
                     rows={2} className="contraintes-textarea"/>
                 </div>
+
               </div>
             </div>
           )}

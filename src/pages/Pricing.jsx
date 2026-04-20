@@ -1,44 +1,54 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import Nav from "../components/Nav";
+import Footer from "../components/Footer";
 import { useAuth } from "../contexts/AuthContext";
 
 const PLANS = [
   {
-    id       : "solo",
-    name     : "Solo",
-    price    : 29,
-    desc     : "Pour les agents indépendants",
-    features : [
-      "1 utilisateur",
-      "20 devis premium/mois",
-      "Export PDF pro",
-      "Support humain",
+    id      : "solo",
+    name    : "Solo",
+    price   : 29,
+    desc    : "Pour les agents indépendants",
+    features: [
+      { text: "1 utilisateur",           included: true  },
+      { text: "20 devis premium/mois",   included: true  },
+      { text: "Export PDF pro",          included: true  },
+      { text: "Historique des devis",    included: true  },
+      { text: "Branding agence sur PDF", included: false },
+      { text: "Multi-utilisateurs",      included: false },
+      { text: "Support humain",          included: true  },
     ],
   },
   {
-    id       : "pro",
-    name     : "Pro",
-    price    : 59,
-    desc     : "Pour les petites agences",
-    popular  : true,
-    features : [
-      "3 utilisateurs",
-      "Devis illimités",
-      "Branding agence sur PDF",
-      "Support prioritaire",
+    id      : "pro",
+    name    : "Pro",
+    price   : 59,
+    desc    : "Pour les petites agences",
+    popular : true,
+    features: [
+      { text: "3 utilisateurs",          included: true  },
+      { text: "Devis illimités",         included: true  },
+      { text: "Export PDF pro",          included: true  },
+      { text: "Historique des devis",    included: true  },
+      { text: "Branding agence sur PDF", included: true  },
+      { text: "Multi-utilisateurs",      included: false },
+      { text: "Support prioritaire",     included: true  },
     ],
   },
   {
-    id       : "studio",
-    name     : "Studio",
-    price    : 99,
-    desc     : "Pour les agences établies",
-    features : [
-      "5+ utilisateurs",
-      "Multi-users",
-      "Branding agence sur PDF",
-      "Support prioritaire dédié",
+    id      : "studio",
+    name    : "Studio",
+    price   : 99,
+    desc    : "Pour les agences établies",
+    features: [
+      { text: "5+ utilisateurs",              included: true },
+      { text: "Devis illimités",              included: true },
+      { text: "Export PDF pro",               included: true },
+      { text: "Historique des devis",         included: true },
+      { text: "Branding agence sur PDF",      included: true },
+      { text: "Multi-utilisateurs",           included: true },
+      { text: "Support prioritaire dédié",    included: true },
     ],
   },
 ];
@@ -135,13 +145,21 @@ export default function Pricing() {
 
               <ul className="pricing-features-list">
                 {plan.features.map((f) => (
-                  <li key={f} className="pricing-feature-item">
-                    <svg viewBox="0 0 16 16" fill="none" width="15" height="15">
-                      <circle cx="8" cy="8" r="7" stroke="#B8965A" strokeWidth="1.5"/>
-                      <path d="M5 8l2.5 2.5L11 5.5" stroke="#B8965A" strokeWidth="1.5"
-                        strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    {f}
+                  <li key={f.text} className={`pricing-feature-item${f.included ? "" : " pricing-feature-item--off"}`}>
+                    {f.included ? (
+                      <svg viewBox="0 0 16 16" fill="none" width="15" height="15" style={{ flexShrink: 0 }}>
+                        <circle cx="8" cy="8" r="7" stroke="#B8965A" strokeWidth="1.5"/>
+                        <path d="M5 8l2.5 2.5L11 5.5" stroke="#B8965A" strokeWidth="1.5"
+                          strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    ) : (
+                      <svg viewBox="0 0 16 16" fill="none" width="15" height="15" style={{ flexShrink: 0 }}>
+                        <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" opacity="0.3"/>
+                        <path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke="currentColor" strokeWidth="1.5"
+                          strokeLinecap="round" opacity="0.4"/>
+                      </svg>
+                    )}
+                    {f.text}
                   </li>
                 ))}
               </ul>
@@ -195,10 +213,32 @@ export default function Pricing() {
 
       </main>
 
-      <footer className="footer">
-        <span>Qovee © 2025</span>
-        <span className="footer-dot">·</span>
-        <span>À partir de 29 €/mois</span>
+      <footer className="site-footer">
+        <div className="site-footer-inner">
+          <div className="site-footer-brand">
+            <span className="site-footer-name">
+              <span className="site-footer-name-q">Q</span>ovee
+            </span>
+          </div>
+          <div className="site-footer-links">
+            {[
+              { to: "/mentions-legales", label: "Mentions légales" },
+              { to: "/confidentialite",  label: "Confidentialité" },
+              { to: "/cookies",          label: "Cookies" },
+              { to: "/cgu",              label: "CGU" },
+              { to: "/cgv",              label: "CGV" },
+            ].map(({ to, label }, i, arr) => (
+              <span key={to} style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+                <Link to={to} className="site-footer-link">{label}</Link>
+                {i < arr.length - 1 && <span style={{ color: "#8A9BA8" }}>·</span>}
+              </span>
+            ))}
+          </div>
+          <p className="site-footer-baseline">
+            <span style={{ color: "#fff" }}>Décris le voyage. </span>
+            <span style={{ color: "var(--terra)" }}>Qovee rédige le devis.</span>
+          </p>
+        </div>
       </footer>
     </div>
   );

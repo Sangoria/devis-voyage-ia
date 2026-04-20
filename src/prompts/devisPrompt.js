@@ -199,17 +199,25 @@ Structure EXACTE attendue :
 // ─────────────────────────────────────────────────────────────────────────────
 function buildUserPrompt(formData = {}) {
   const {
-    demandeClient   = "",
-    destination     = "",
-    typeGroupe      = "",
-    voyageurs       = "",
-    budget          = "",
-    budgetMode      = "total",
-    dateDebut       = "",
-    dateFin         = "",
-    datesFlexibles  = false,
-    typesExperience = [],
-    contraintes     = "",
+    demandeClient      = "",
+    destination        = "",
+    typeGroupe         = "",
+    voyageurs          = "",
+    budget             = "",
+    budgetMode         = "total",
+    dateDebut          = "",
+    dateFin            = "",
+    datesFlexibles     = false,
+    typesExperience    = [],
+    contraintes        = "",
+    compagnieAerienne  = "",
+    prixVols           = "",
+    nomHotel           = "",
+    etoilesHotel       = "",
+    prixHotel          = "",
+    transfertInclus    = false,
+    prixTransfert      = "",
+    nomTransporteur    = "",
   } = formData;
 
   // Calcul durée si dates disponibles
@@ -252,6 +260,20 @@ function buildUserPrompt(formData = {}) {
   }
 
   if (contraintes)        lines.push(`- Contraintes       : ${contraintes}`);
+
+  // Données prérenseignées (vol, hôtel, transfert)
+  const hasPreset = compagnieAerienne || prixVols || nomHotel || etoilesHotel || prixHotel || transfertInclus;
+  if (hasPreset) {
+    lines.push(``);
+    lines.push(`DONNÉES PRÉRENSEIGNÉES PAR L'AGENT (à utiliser EXACTEMENT, sans modifier) :`);
+    if (compagnieAerienne) lines.push(`- Compagnie aérienne : ${compagnieAerienne}`);
+    if (prixVols)          lines.push(`- Prix vols (total)  : ${Number(prixVols).toLocaleString("fr-FR")} €`);
+    if (nomHotel)          lines.push(`- Hôtel              : ${nomHotel}${etoilesHotel ? ` (${etoilesHotel}★)` : ""}`);
+    if (prixHotel)         lines.push(`- Prix hôtel         : ${Number(prixHotel).toLocaleString("fr-FR")} €/nuit`);
+    if (transfertInclus) {
+      lines.push(`- Transfert          : Inclus${nomTransporteur ? ` — transporteur : ${nomTransporteur}` : ""}${prixTransfert ? ` — prix : ${Number(prixTransfert).toLocaleString("fr-FR")} €` : ""}`);
+    }
+  }
 
   lines.push(``);
   lines.push(`INSTRUCTIONS DE GÉNÉRATION :`);

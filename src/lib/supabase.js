@@ -57,6 +57,46 @@ export async function fetchDevis(userId) {
     .order("created_at", { ascending: false });
 }
 
+/** Upload un avatar et retourne son URL publique. */
+export async function uploadAvatar(userId, file) {
+  const ext  = file.name.split(".").pop();
+  const path = `${userId}/avatar.${ext}`;
+  const { error: upErr } = await supabase.storage
+    .from("avatars")
+    .upload(path, file, { upsert: true, contentType: file.type });
+  if (upErr) { console.error("Avatar upload error:", upErr); return { url: null, error: upErr }; }
+
+  const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+  const url = `${data.publicUrl}?t=${Date.now()}`;
+
+  const { error: dbErr } = await supabase
+    .from("profiles")
+    .update({ avatar_url: url })
+    .eq("id", userId);
+
+  return { url, error: dbErr ?? null };
+}
+
+/** Upload le logo agence et retourne son URL publique. */
+export async function uploadLogo(userId, file) {
+  const ext  = file.name.split(".").pop();
+  const path = `${userId}/logo.${ext}`;
+  const { error: upErr } = await supabase.storage
+    .from("avatars")
+    .upload(path, file, { upsert: true, contentType: file.type });
+  if (upErr) return { url: null, error: upErr };
+
+  const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+  const url = `${data.publicUrl}?t=${Date.now()}`;
+
+  const { error: dbErr } = await supabase
+    .from("profiles")
+    .update({ logo_url: url })
+    .eq("id", userId);
+
+  return { url, error: dbErr ?? null };
+}
+
 /** Compte le nombre de devis d'un utilisateur (pour le quota gratuit). */
 export async function countDevis(userId) {
   const { count, error } = await supabase

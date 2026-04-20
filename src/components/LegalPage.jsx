@@ -27,7 +27,7 @@ export default function LegalPage({ title, lastUpdated, content }) {
             borderRadius   : "8px",
             padding        : "0.4rem 0.9rem",
             fontSize       : "0.82rem",
-            fontFamily     : "'DM Mono', monospace",
+            fontFamily     : "'Syne', sans-serif",
             textDecoration : "none",
             marginBottom   : "2.5rem",
             transition     : "background 0.15s, color 0.15s",
