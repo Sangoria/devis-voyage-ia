@@ -253,6 +253,37 @@ export default function Accueil() {
         </div>
       </section>
 
+      {/* ── CTA final ── */}
+      <section style={{
+        background : "#1C1611",
+        padding    : "5rem 1.5rem",
+        textAlign  : "center",
+      }}>
+        <div style={{ maxWidth: "600px", margin: "0 auto" }}>
+          <h2 style={{
+            fontFamily : "var(--font-serif, 'Cormorant Garamond', serif)",
+            fontSize   : "clamp(1.8rem, 5vw, 2.8rem)",
+            fontWeight : 600,
+            color      : "#FAF7F2",
+            margin     : "0 0 1rem",
+            lineHeight : 1.2,
+          }}>
+            Votre prochain devis,<br />prêt en 2 minutes.
+          </h2>
+          <p style={{
+            color      : "#A89485",
+            fontSize   : "1.05rem",
+            margin     : "0 0 2rem",
+            lineHeight : 1.6,
+          }}>
+            7 jours d'essai gratuit, sans carte bancaire.
+          </p>
+          <button className="hero-cta" onClick={handleCta}>
+            Essayer Qovee gratuitement →
+          </button>
+        </div>
+      </section>
+
       <Footer />
     </div>
   );

@@ -112,12 +112,11 @@ async function callClaude(systemPrompt, userPrompt) {
       max_tokens : 8000,
       system     : systemPrompt,
       messages   : [
-        { role: "user",      content: userPrompt },
-        { role: "assistant", content: "{"        },
+        { role: "user", content: userPrompt },
       ],
     });
 
-    const rawText = "{" + (response.content[0]?.text ?? "");
+    const rawText = response.content[0]?.text ?? "";
     console.log("=== RÉPONSE BRUTE CLAUDE ===\n", rawText.substring(0, 500), "\n=== FIN ===");
 
     try {

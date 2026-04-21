@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider }   from "./contexts/AuthContext";
 import ProtectedRoute     from "./components/ProtectedRoute";
@@ -14,6 +14,7 @@ import Confidentialite    from "./pages/legal/Confidentialite";
 import Cookies            from "./pages/legal/Cookies";
 import CGU                from "./pages/legal/CGU";
 import CGV                from "./pages/legal/CGV";
+import NotFound           from "./pages/NotFound";
 
 export default function App() {
   return (
@@ -45,8 +46,8 @@ export default function App() {
               <ProtectedRoute><MonCompte /></ProtectedRoute>
             }/>
 
-            {/* Fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            {/* 404 */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>
