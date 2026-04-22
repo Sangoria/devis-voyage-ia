@@ -136,6 +136,15 @@ app.post("/api/generate-quote", async (req, res) => {
     return res.status(400).json({ error: "La demande client est obligatoire." });
   }
   try {
+    // Convertit "jj/mm/aaaa" → "yyyy-mm-dd" pour éviter la confusion MM/DD de JS
+    function normFrDate(str) {
+      if (!str || !str.includes("/")) return str;
+      const [d, m, y] = str.split("/");
+      return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+    }
+    if (formData.dateDebut) formData.dateDebut = normFrDate(formData.dateDebut);
+    if (formData.dateFin)   formData.dateFin   = normFrDate(formData.dateFin);
+
     const { generateDevisPrompt } = await import("./src/prompts/devisPrompt.js");
     const { systemPrompt, userPrompt } = generateDevisPrompt(formData);
     const devis = await callClaude(systemPrompt, userPrompt);

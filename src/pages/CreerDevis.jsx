@@ -35,9 +35,10 @@ const FORM_INIT = {
   budget: "", budgetMode: "total",
   dateDebut: "", dateFin: "", datesFlexibles: false,
   typesExperience: [], contraintes: "", demandeClient: "",
-  compagnieAerienne: "", prixVols: "",
-  nomHotel: "", etoilesHotel: "", prixHotel: "",
+  aeroportDepart: "", aeroportArrivee: "", compagnieAerienne: "", prixVols: "",
+  nomHotel: "", etoilesHotel: "", prixHotel: "", formuleHotel: "",
   transfertInclus: false, prixTransfert: "", nomTransporteur: "",
+  locationVehicule: false, nomLoueur: "", typeVehicule: "", prixLocation: "",
 };
 
 export default function CreerDevis() {
@@ -298,6 +299,36 @@ export default function CreerDevis() {
                 </div>
 
                 <div className="form-field">
+                  <label htmlFor="aeroportDepart">
+                    Aéroport de départ
+                    <span className="label-optional"> · optionnel</span>
+                  </label>
+                  <div className="input-wrap">
+                    <svg className="input-icon" viewBox="0 0 20 20" fill="none">
+                      <path d="M3 17h14M5 13l2-8 5 3 3-5 2 1-3 6 3 2-1 2-5-3-4 3-2-1z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                    </svg>
+                    <input id="aeroportDepart" name="aeroportDepart"
+                      value={form.aeroportDepart} onChange={handleChange}
+                      placeholder="Ex : Paris CDG, Lyon LYS…"/>
+                  </div>
+                </div>
+
+                <div className="form-field">
+                  <label htmlFor="aeroportArrivee">
+                    Aéroport d'arrivée
+                    <span className="label-optional"> · optionnel</span>
+                  </label>
+                  <div className="input-wrap">
+                    <svg className="input-icon" viewBox="0 0 20 20" fill="none">
+                      <path d="M3 17h14M5 13l2-8 5 3 3-5 2 1-3 6 3 2-1 2-5-3-4 3-2-1z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                    </svg>
+                    <input id="aeroportArrivee" name="aeroportArrivee"
+                      value={form.aeroportArrivee} onChange={handleChange}
+                      placeholder="Ex : Bali DPS, Tokyo NRT…"/>
+                  </div>
+                </div>
+
+                <div className="form-field">
                   <label htmlFor="compagnieAerienne">
                     Compagnie aérienne
                     <span className="label-optional"> · optionnel</span>
@@ -354,6 +385,7 @@ export default function CreerDevis() {
                       value={form.nomHotel} onChange={handleChange}
                       placeholder="Ex : Alaya Resort Ubud"/>
                   </div>
+                  <p className="field-hint">Si plusieurs hôtels, merci de les modifier directement une fois le devis généré</p>
                 </div>
 
                 <div className="form-field">
@@ -366,7 +398,7 @@ export default function CreerDevis() {
                       <button key={n} type="button"
                         className={`groupe-chip${form.etoilesHotel === n ? " active" : ""}`}
                         onClick={() => setForm((f) => ({ ...f, etoilesHotel: f.etoilesHotel === n ? "" : n }))}>
-                        {"★".repeat(Number(n))}
+                        {n}★
                       </button>
                     ))}
                   </div>
@@ -386,6 +418,22 @@ export default function CreerDevis() {
                       value={form.prixHotel} onChange={handleChange}
                       placeholder="155" min="0"/>
                     <span className="input-suffix">€/nuit</span>
+                  </div>
+                </div>
+
+                <div className="form-field span-2">
+                  <label>
+                    Formule
+                    <span className="label-optional"> · optionnel</span>
+                  </label>
+                  <div className="groupe-chips" style={{ marginTop: "0.25rem" }}>
+                    {["Aucun", "Demi-pension", "Pension complète", "Tout compris"].map((r) => (
+                      <button key={r} type="button"
+                        className={`groupe-chip${form.formuleHotel === r ? " active" : ""}`}
+                        onClick={() => setForm((f) => ({ ...f, formuleHotel: f.formuleHotel === r ? "" : r }))}>
+                        {r}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
@@ -436,6 +484,61 @@ export default function CreerDevis() {
                         <input id="prixTransfert" type="number" name="prixTransfert"
                           value={form.prixTransfert} onChange={handleChange}
                           placeholder="185" min="0"/>
+                        <span className="input-suffix">€</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <div className="form-field span-2">
+                  <label className="checkbox-label">
+                    <input type="checkbox" name="locationVehicule" checked={form.locationVehicule}
+                      onChange={handleChange} className="checkbox-input"/>
+                    <span className="checkbox-box"/>
+                    <span className="checkbox-text">Location de véhicule</span>
+                  </label>
+                </div>
+
+                {form.locationVehicule && (
+                  <>
+                    <div className="form-field span-2">
+                      <label htmlFor="nomLoueur">Nom du loueur</label>
+                      <div className="input-wrap">
+                        <svg className="input-icon" viewBox="0 0 20 20" fill="none">
+                          <circle cx="8" cy="6" r="3" stroke="currentColor" strokeWidth="1.5"/>
+                          <path d="M2 17a6 6 0 0112 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        </svg>
+                        <input id="nomLoueur" name="nomLoueur"
+                          value={form.nomLoueur} onChange={handleChange}
+                          placeholder="Ex : Europcar, Hertz, loueur local…"/>
+                      </div>
+                    </div>
+
+                    <div className="form-field">
+                      <label htmlFor="typeVehicule">Type de véhicule</label>
+                      <div className="input-wrap">
+                        <svg className="input-icon" viewBox="0 0 20 20" fill="none">
+                          <rect x="2" y="7" width="16" height="8" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+                          <path d="M5 7V6a2 2 0 014 0v1M11 7V6a2 2 0 014 0v1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                          <circle cx="5.5" cy="15" r="1.5" fill="currentColor"/>
+                          <circle cx="14.5" cy="15" r="1.5" fill="currentColor"/>
+                        </svg>
+                        <input id="typeVehicule" name="typeVehicule"
+                          value={form.typeVehicule} onChange={handleChange}
+                          placeholder="Ex : SUV automatique, 4x4…"/>
+                      </div>
+                    </div>
+
+                    <div className="form-field">
+                      <label htmlFor="prixLocation">Prix de la location</label>
+                      <div className="input-wrap">
+                        <svg className="input-icon" viewBox="0 0 20 20" fill="none">
+                          <rect x="2" y="5" width="16" height="12" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+                          <path d="M2 9h16" stroke="currentColor" strokeWidth="1.5"/>
+                        </svg>
+                        <input id="prixLocation" type="number" name="prixLocation"
+                          value={form.prixLocation} onChange={handleChange}
+                          placeholder="560" min="0"/>
                         <span className="input-suffix">€</span>
                       </div>
                     </div>

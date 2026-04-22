@@ -20,23 +20,34 @@ function lighten(rgb, amount = 0.75) {
   return rgb.map((c) => Math.round(c + (255 - c) * amount));
 }
 
+const PAGE_BG = lighten(GOLD, 0.87);
+
 // ── Constantes de mise en page ───────────────────────────────────────
 const W      = 210;
 const H      = 297;
 const MARGIN = 18;
-const CW     = W - MARGIN * 2;   // largeur du contenu
-const SAFE_Y = H - 26;            // zone sûre avant footer
-const FOOT_Y = H - 18;            // y de début footer
+const CW     = W - MARGIN * 2;
+const SAFE_Y = H - 26;
+const FOOT_Y = H - 18;
 
-// ── Helpers ──────────────────────────────────────────────────────────
+// ── Helpers texte ────────────────────────────────────────────────────
 function money(n) {
-  return Number(n || 0).toLocaleString("fr-FR") + " \u20AC";
+  return Number(n || 0).toLocaleString("fr-FR").replace(/ | /g, " ") + " €";
+}
+
+function parseFrDate(str) {
+  if (!str) return null;
+  if (str.includes("/")) {
+    const [d, m, y] = str.split("/");
+    return new Date(`${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`);
+  }
+  return new Date(str);
 }
 
 function longDate(str) {
   if (!str) return "";
   try {
-    return new Date(str).toLocaleDateString("fr-FR", {
+    return parseFrDate(str).toLocaleDateString("fr-FR", {
       day: "numeric", month: "long", year: "numeric",
     });
   } catch { return str; }
@@ -45,52 +56,63 @@ function longDate(str) {
 function shortDate(str) {
   if (!str) return "";
   try {
-    return new Date(str).toLocaleDateString("fr-FR", {
+    return parseFrDate(str).toLocaleDateString("fr-FR", {
       day: "numeric", month: "short", year: "numeric",
     });
   } catch { return str; }
 }
 
-/** Ajoute une page et retourne le nouveau y (MARGIN). */
+/**
+ * Nettoie le texte IA pour le PDF :
+ * - Convertit les suites d'étoiles Unicode en notation "N*" (ex: ★★★★★ → 5*)
+ * - Remplace les tirets cadratin/demi-cadratin par une virgule espace (jamais de — dans un devis pro)
+ */
+function sanitize(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/★+|❤+/g, (m) => `${m.length}*`)   // ★★★★ → 4*
+    .replace(/\s*[—–]\s*/g, ", ")                // — et – → ", "
+    .trim();
+}
+
+// ── Helpers layout ───────────────────────────────────────────────────
 function addPage(doc) {
   doc.addPage();
+  doc.setFillColor(...PAGE_BG);
+  doc.rect(0, 0, W, H, "F");
   return MARGIN;
 }
 
-/** Retourne y inchangé ou ajoute une page si on dépasse SAFE_Y. */
 function guard(doc, y, needed) {
   return y + needed > SAFE_Y ? addPage(doc) : y;
 }
 
-/** Dessine la barre de section (fond Ocean + label Gold). Retourne le y après la barre. */
-function sectionBar(doc, y, label) {
+function sectionBar(doc, y, label, sublabel) {
   doc.setFillColor(...OCEAN);
-  doc.rect(MARGIN, y, CW, 8.5, "F");
+  doc.rect(MARGIN, y, CW, sublabel ? 13 : 8.5, "F");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.5);
+  doc.setFontSize(8);
   doc.setTextColor(...GOLD);
-  doc.text(label, MARGIN + 4, y + 5.7);
-  return y + 13;
+  doc.text(label, MARGIN + 4, y + (sublabel ? 6 : 5.7));
+  if (sublabel) {
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(6.5);
+    doc.setTextColor(...MIST);
+    doc.text(sublabel, MARGIN + 4, y + 10.5);
+  }
+  return y + (sublabel ? 18 : 13);
 }
 
-/** Dessine le pied de page sur la page courante. */
 function drawFooter(doc, pageNum, totalPages, ref) {
   doc.setFillColor(...OCEAN);
   doc.rect(0, FOOT_Y, W, H - FOOT_Y, "F");
-
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(...MIST);
   doc.text(`Ref. ${ref}`, MARGIN, FOOT_Y + 7);
   doc.text(`Page ${pageNum} / ${totalPages}`, W - MARGIN, FOOT_Y + 7, { align: "right" });
-
-  doc.setFont("helvetica", "italic");
-  doc.setFontSize(6);
-  doc.setTextColor(80, 100, 115);
-  doc.text("Devis genere avec Qovee  \u00B7  qovee.fr  \u00B7  29 \u20AC/mois", W / 2, FOOT_Y + 13, { align: "center" });
 }
 
-// ── Helpers image ────────────────────────────────────────────────────
 async function loadImageAsDataUrl(url) {
   const res  = await fetch(url);
   const blob = await res.blob();
@@ -130,10 +152,13 @@ export async function generatePdf(devis, formData = {}, profile = {}) {
 
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
+  // Fond doré clair page 1
+  doc.setFillColor(...PAGE_BG);
+  doc.rect(0, 0, W, H, "F");
+
   const ref   = `QOV-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`;
   const today = longDate(new Date().toISOString().split("T")[0]);
 
-  // Durée
   let duree = "";
   if (dateDebut && dateFin) {
     const d = Math.round((new Date(dateFin) - new Date(dateDebut)) / 86400000);
@@ -143,22 +168,17 @@ export async function generatePdf(devis, formData = {}, profile = {}) {
   }
 
   // ── EN-TÊTE PAGE 1 ──────────────────────────────────────────────────
-
   const agencyName  = profile?.agency_name   || "";
   const contactName = profile?.contact_name  || "";
   const phone       = profile?.phone         || "";
   const website     = profile?.website       || "";
   const logoUrl     = profile?.logo_url      || null;
 
-  // Fond Ocean
   doc.setFillColor(...OCEAN);
   doc.rect(0, 0, W, 62, "F");
-
-  // Bande accent en bas du header
   doc.setFillColor(...TERRA);
   doc.rect(0, 59, W, 3, "F");
 
-  // Logo agence (fallback: favicon Qovee)
   try {
     const src = logoUrl || "/favicon.png";
     const imgData = await loadImageAsDataUrl(src);
@@ -172,48 +192,41 @@ export async function generatePdf(devis, formData = {}, profile = {}) {
 
   const nameX = MARGIN + 30;
 
-  // Nom de l'agence
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
   doc.setTextColor(...WHITE);
   doc.text(agencyName || "Mon Agence", nameX, 19);
 
-  // Ligne contact : responsable · téléphone · site web
   const contactParts = [contactName, phone, website].filter(Boolean);
   if (contactParts.length > 0) {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7);
     doc.setTextColor(...MIST);
-    doc.text(contactParts.join("  \u00B7  "), nameX, 27);
+    doc.text(contactParts.join("  ·  "), nameX, 27);
   }
 
-  // Mention Qovee discrète
   doc.setFont("helvetica", "italic");
   doc.setFontSize(6);
   doc.setTextColor(60, 85, 100);
   doc.text("Propulse par Qovee", nameX, 34);
 
-  // "Proposition de voyage"
   doc.setFont("helvetica", "bold");
   doc.setFontSize(23);
   doc.setTextColor(...SAND);
   doc.text("Proposition de voyage", MARGIN, 43);
 
-  // Titre du devis (court)
   const titreShort = titre.length > 58 ? titre.substring(0, 58) + "..." : titre;
   doc.setFont("helvetica", "italic");
   doc.setFontSize(10.5);
   doc.setTextColor(...TERRA);
-  doc.text(titreShort, MARGIN, 52);
+  doc.text(sanitize(titreShort), MARGIN, 52);
 
-  // Ref + date (haut droite)
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(...MIST);
   doc.text(`Ref. ${ref}`, W - MARGIN, 18, { align: "right" });
   doc.text(`Emis le ${today}`, W - MARGIN, 24.5, { align: "right" });
 
-  // Badge "Valable 30 jours"
   doc.setFillColor(...TERRA);
   doc.roundedRect(W - MARGIN - 38, 44.5, 38, 9, 2, 2, "F");
   doc.setFont("helvetica", "bold");
@@ -223,12 +236,11 @@ export async function generatePdf(devis, formData = {}, profile = {}) {
 
   let y = 72;
 
-  // ── BLOC RÉSUMÉ DU VOYAGE ────────────────────────────────────────────
-
-  // Calcul de la hauteur du bloc
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  const resumeLines = doc.splitTextToSize(resume || "", CW - 20);
+  // ── BLOC RÉCAPITULATIF (compact) ────────────────────────────────────
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(8);
+  const resumeAllLines = resume ? doc.splitTextToSize(sanitize(resume), CW - 20) : [];
+  const resumeLines = resumeAllLines.slice(0, 2); // max 2 lignes pour tenir sur page 1
 
   const metaItems = [
     destination && `Destination : ${destination}`,
@@ -238,147 +250,257 @@ export async function generatePdf(devis, formData = {}, profile = {}) {
     dateFin     && `Retour      : ${shortDate(dateFin)}`,
   ].filter(Boolean);
 
-  const expLine = typesExperience.length > 0 ? typesExperience.join("  -  ") : "";
+  const expLine = typesExperience.length > 0 ? typesExperience.join("  ·  ") : "";
 
-  const boxH = 10
-    + (metaItems.length > 0 ? Math.ceil(metaItems.length / 2) * 7 + 5 : 0)
-    + (expLine ? 9 : 0)
-    + (resume ? resumeLines.length * 5.2 + 4 : 0)
-    + 6;
+  const boxH = 6
+    + (metaItems.length > 0 ? Math.ceil(metaItems.length / 2) * 5.5 + 3 : 0)
+    + (expLine ? 6 : 0)
+    + (resumeLines.length > 0 ? resumeLines.length * 4.5 + 2 : 0)
+    + 4;
 
-  // Fond Cream + bordure
   doc.setFillColor(...CREAM);
   doc.setDrawColor(...BORDER);
   doc.setLineWidth(0.4);
   doc.roundedRect(MARGIN, y, CW, boxH, 3, 3, "FD");
 
-  // Barre Terracotta gauche
   doc.setFillColor(...TERRA);
   doc.roundedRect(MARGIN, y, 3.5, boxH, 1.5, 1.5, "F");
 
   const bx = MARGIN + 10;
-  let by = y + 8;
+  let by = y + 7;
 
-  // Grille méta (2 colonnes)
   if (metaItems.length > 0) {
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.5);
+    doc.setFontSize(8);
     doc.setTextColor(...OCEAN);
     metaItems.forEach((item, idx) => {
       const col = idx % 2;
       const row = Math.floor(idx / 2);
-      doc.text(item, bx + col * (CW / 2 - 5), by + row * 7);
+      doc.text(item, bx + col * (CW / 2 - 5), by + row * 5.5);
     });
-    by += Math.ceil(metaItems.length / 2) * 7 + 3;
+    by += Math.ceil(metaItems.length / 2) * 5.5 + 3;
 
-    // Séparateur
     doc.setDrawColor(...BORDER);
     doc.setLineWidth(0.3);
     doc.line(bx, by, W - MARGIN - 4, by);
-    by += 5;
+    by += 4;
   }
 
-  // Types d'expérience
   if (expLine) {
     doc.setFont("helvetica", "italic");
     doc.setFontSize(7.5);
     doc.setTextColor(...MIST);
     doc.text("Experience : " + expLine, bx, by);
-    by += 8;
+    by += 7;
   }
 
-  // Résumé texte
-  if (resume) {
+  if (resumeLines.length > 0) {
     doc.setFont("helvetica", "italic");
-    doc.setFontSize(9);
+    doc.setFontSize(8);
     doc.setTextColor(...OCEAN);
     doc.text(resumeLines, bx, by);
   }
 
-  y += boxH + 12;
+  y += boxH + 6;
 
-  // ── PROGRAMME DÉTAILLÉ ───────────────────────────────────────────────
+  // ── TABLEAU DES PRIX (PAGE 1) ────────────────────────────────────────
+  const tableRows = [];
+
+  const addRow = (poste, detail, qtyLabel, total) => {
+    tableRows.push([
+      poste,
+      sanitize(detail) || "",
+      qtyLabel || "",
+      money(total || 0),
+    ]);
+  };
+
+  if (couts.vols) {
+    const v = couts.vols;
+    const qty = v.quantite && v.prix_unitaire ? `${v.quantite} x ${money(v.prix_unitaire)}` : "";
+    addRow("Vols aller-retour", v.detail, qty, v.total ?? v.montant);
+  }
+  if (couts.hebergement) {
+    const h = couts.hebergement;
+    const qty = h.quantite && h.prix_unitaire ? `${h.quantite} nuits x ${money(h.prix_unitaire)}` : "";
+    addRow("Hebergement", h.detail, qty, h.total ?? h.montant);
+  }
+  if (Array.isArray(couts.excursions) && couts.excursions.length > 0) {
+    const totalExc = couts.excursions.reduce((s, e) => s + Number(e.prix || 0), 0);
+    const detail   = couts.excursions.map((e) => {
+      const nom = sanitize(e.nom || "");
+      return (nom.length > 48 ? nom.substring(0, 48) + "..." : nom);
+    }).join("\n");
+    addRow("Excursions & activites", detail, "", totalExc);
+  } else if (couts.excursions) {
+    const e = couts.excursions;
+    addRow("Excursions & activites", e.detail, "", e.total ?? e.montant);
+  }
+  if (couts.transferts) {
+    const t = couts.transferts;
+    addRow("Transferts", t.detail, "", t.total ?? t.montant);
+  }
+  if (couts.location) {
+    const l = couts.location;
+    addRow("Location de vehicule", l.detail, "", l.total ?? l.montant);
+  }
+  if (couts.assurance) {
+    const a = couts.assurance;
+    addRow("Assurance voyage", a.detail, "", a.total ?? a.montant);
+  }
+  if (couts.divers) {
+    const d = couts.divers;
+    addRow("Divers", d.detail, "", d.total ?? d.montant);
+  }
+
+  if (tableRows.length > 0) {
+    y = sectionBar(doc, y, "DETAIL DES COUTS");
+
+    autoTable(doc, {
+      startY: y,
+      head: [["Poste", "Detail", "Qte x P.U.", "Montant"]],
+      body: tableRows,
+      foot: [[
+        { content: "TOTAL TTC", styles: { fontStyle: "bold", textColor: OCEAN, fontSize: 10 } },
+        {
+          content: budgetMode === "personne" ? "Prix par personne" : "Prix total groupe",
+          styles: { textColor: MIST, fontStyle: "italic" },
+          colSpan: 2,
+        },
+        { content: money(totalFinal), styles: { fontStyle: "bold", textColor: TERRA, fontSize: 12 } },
+      ]],
+      theme: "plain",
+      styles: {
+        font: "helvetica",
+        fontSize: 7.5,
+        cellPadding: { top: 2, right: 3, bottom: 2, left: 3 },
+        textColor: OCEAN,
+        lineColor: BORDER,
+        lineWidth: 0.3,
+      },
+      headStyles: {
+        fillColor: OCEAN,
+        textColor: GOLD,
+        fontStyle: "bold",
+        fontSize: 7.5,
+        cellPadding: { top: 3, right: 3, bottom: 3, left: 3 },
+      },
+      footStyles: {
+        fillColor: TERRA_L,
+        lineWidth: 0,
+        cellPadding: { top: 4, right: 3, bottom: 4, left: 3 },
+      },
+      columnStyles: {
+        0: { fontStyle: "bold", cellWidth: 46 },
+        1: { textColor: MIST },
+        2: { textColor: MIST, cellWidth: 34 },
+        3: { halign: "right", fontStyle: "bold", cellWidth: 34 },
+      },
+      alternateRowStyles: { fillColor: CREAM },
+      margin: { left: MARGIN, right: MARGIN, bottom: 20 },
+      didAddPage: () => {
+        doc.setFillColor(...PAGE_BG);
+        doc.rect(0, 0, W, H, "F");
+      },
+    });
+  }
+
+  // ── PROGRAMME — TOUJOURS PAGE 2 ──────────────────────────────────────
+  doc.addPage();
+  y = MARGIN;
 
   if (itineraire.length > 0) {
-    y = guard(doc, y, 20);
-    y = sectionBar(doc, y, "PROGRAMME DETAILLE - ITINERAIRE JOUR PAR JOUR");
+    // Titre de section stylisé
+    y = sectionBar(
+      doc, y,
+      "PROGRAMME DETAILLE",
+      "Itineraire jour par jour"
+    );
 
     itineraire.forEach((jour, i) => {
-      // Support nouvelle structure (activites[]) ET ancienne (matin/apresmidi/soir)
       const rawActivites = Array.isArray(jour.activites)
-        ? jour.activites.map((a) => ({ label: null, text: a }))
+        ? jour.activites.map((a) => ({ label: null, text: sanitize(a) }))
         : [
-            jour.matin     && { label: "MATIN",      text: jour.matin },
-            jour.apresmidi && { label: "APRES-MIDI", text: jour.apresmidi },
-            jour.soir      && { label: "SOIR",       text: jour.soir },
+            jour.matin     && { label: "MATIN",      text: sanitize(jour.matin) },
+            jour.apresmidi && { label: "APRES-MIDI", text: sanitize(jour.apresmidi) },
+            jour.soir      && { label: "SOIR",       text: sanitize(jour.soir) },
           ].filter(Boolean);
-      const slots = rawActivites;
 
-      // Estimation hauteur du jour
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(8.5);
-      let estH = 10;
-      slots.forEach((s) => {
-        estH += doc.splitTextToSize(s.text, CW - 36).length * 5.2 + 5;
+      doc.setFontSize(8);
+      let estH = 12;
+      rawActivites.forEach((s) => {
+        estH += doc.splitTextToSize(s.text, CW - 36).length * 5 + 5;
       });
+      if (jour.hebergement) estH += 6;
+      if (jour.repas) estH += 6;
 
       y = guard(doc, y, estH);
 
-      // Ligne du jour (fond bleu-gris clair)
+      // Ligne du jour
       doc.setFillColor(236, 242, 246);
-      doc.rect(MARGIN, y, CW, 8.5, "F");
+      doc.rect(MARGIN, y, CW, 9, "F");
 
-      // Point Terracotta
-      doc.setFillColor(...TERRA);
-      doc.circle(MARGIN + 6, y + 4.2, 2.5, "F");
+      doc.setFillColor(...GOLD);
+      doc.rect(MARGIN + 4.5, y + 1.5, 2, 6, "F");
 
-      // "JOUR X"
       doc.setFont("helvetica", "bold");
       doc.setFontSize(8);
       doc.setTextColor(...TERRA);
-      doc.text(`JOUR ${jour.jour}`, MARGIN + 11.5, y + 5.5);
+      doc.text(`JOUR ${jour.jour}`, MARGIN + 11.5, y + 5.8);
 
-      // Date
+      // Date — taille +10% par rapport à l'original (7 → 7.7)
       const ds = shortDate(jour.date);
       if (ds) {
         doc.setFont("helvetica", "normal");
-        doc.setFontSize(7);
+        doc.setFontSize(7.7);
         doc.setTextColor(...MIST);
-        doc.text(ds, MARGIN + 32, y + 5.5);
+        doc.text(ds, MARGIN + 32, y + 5.8);
       }
 
-      // Titre du jour
       if (jour.titre) {
-        const tx = ds ? MARGIN + 74 : MARGIN + 32;
+        const tx = ds ? MARGIN + 54 : MARGIN + 32;
+        const titleW = W - MARGIN - tx;
         doc.setFont("helvetica", "bold");
         doc.setFontSize(8.5);
         doc.setTextColor(...OCEAN);
-        const t = jour.titre.length > 50 ? jour.titre.substring(0, 50) + "..." : jour.titre;
-        doc.text(t, tx, y + 5.5);
+        const t = sanitize(jour.titre);
+        const titleLine = doc.splitTextToSize(t, titleW)[0];
+        doc.text(titleLine, tx, y + 5.8);
       }
 
-      y += 10;
+      y += 11;
 
-      // Slots matin / après-midi / soir
-      // Hébergement + repas (nouvelle structure)
-      if (jour.hebergement || jour.repas) {
-        y = guard(doc, y, 7);
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(7);
+      // Hébergement — nom de l'hôtel (propre, sans étoiles Unicode)
+      if (jour.hebergement) {
+        y = guard(doc, y, 6);
+        const hotelClean = sanitize(jour.hebergement);
+        const hotelShort = hotelClean.length > 80 ? hotelClean.substring(0, 80) + "..." : hotelClean;
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7.5);
         doc.setTextColor(...GOLD);
-        const hotelLine = [jour.hebergement, jour.repas].filter(Boolean).join("  ·  ");
-        doc.text(hotelLine, MARGIN + 4, y + 3);
-        y += 7;
+        doc.text(hotelShort, MARGIN + 8, y + 3.5);
+        y += 5.5;
       }
 
-      slots.forEach((slot) => {
+      // Repas — formule
+      if (jour.repas) {
+        y = guard(doc, y, 5.5);
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(7);
+        doc.setTextColor(...MIST);
+        doc.text(sanitize(jour.repas), MARGIN + 8, y + 3.5);
+        y += 5.5;
+      }
+
+      // Activités
+      rawActivites.forEach((slot) => {
+        const textX = slot.label ? MARGIN + 26 : MARGIN + 8;
+        const textW = slot.label ? CW - 36 : CW - 14;
         doc.setFont("helvetica", "normal");
-        doc.setFontSize(8.5);
-        // Pour activites[], on réduit la largeur selon si on a un label ou non
-        const textX   = slot.label ? MARGIN + 26 : MARGIN + 8;
-        const textW   = slot.label ? CW - 36 : CW - 14;
-        const lines   = doc.splitTextToSize(slot.text, textW);
-        const slotH   = lines.length * 5.2 + 4;
+        doc.setFontSize(8);
+        const lines  = doc.splitTextToSize(slot.text, textW);
+        const slotH  = lines.length * 5 + 4;
 
         y = guard(doc, y, slotH);
 
@@ -388,20 +510,19 @@ export async function generatePdf(devis, formData = {}, profile = {}) {
           doc.setTextColor(...TERRA);
           doc.text(slot.label, MARGIN + 4, y + 4);
         } else {
-          // Puce pour les activites[]
-          doc.setFillColor(...TERRA);
-          doc.circle(MARGIN + 4.5, y + 2.5, 1.2, "F");
+          doc.setDrawColor(...GOLD);
+          doc.setLineWidth(0.9);
+          doc.line(MARGIN + 2.5, y + 3, MARGIN + 6.5, y + 3);
         }
 
         doc.setFont("helvetica", "normal");
-        doc.setFontSize(8.5);
+        doc.setFontSize(8);
         doc.setTextColor(...OCEAN);
         doc.text(lines, textX, y + 4);
 
         y += slotH;
       });
 
-      // Séparateur entre jours
       if (i < itineraire.length - 1) {
         doc.setDrawColor(...BORDER);
         doc.setLineWidth(0.25);
@@ -413,125 +534,19 @@ export async function generatePdf(devis, formData = {}, profile = {}) {
     y += 10;
   }
 
-  // ── TABLEAU DES PRIX ─────────────────────────────────────────────────
-
-  // Construire les lignes du tableau des prix (nouvelle structure + rétrocompat)
-  const tableRows = [];
-
-  const addRow = (poste, detail, qtyLabel, total) => {
-    tableRows.push([poste, detail || "-", qtyLabel || "-", money(total || 0)]);
-  };
-
-  if (couts.vols) {
-    const v = couts.vols;
-    const qty = v.quantite && v.prix_unitaire ? `${v.quantite} × ${money(v.prix_unitaire)}` : "-";
-    addRow("Vols aller-retour", v.detail, qty, v.total ?? v.montant);
-  }
-  if (couts.hebergement) {
-    const h = couts.hebergement;
-    const qty = h.quantite && h.prix_unitaire ? `${h.quantite} nuits × ${money(h.prix_unitaire)}` : "-";
-    addRow("Hebergement", h.detail, qty, h.total ?? h.montant);
-  }
-
-  // Excursions : array (nouvelle structure)
-  if (Array.isArray(couts.excursions)) {
-    couts.excursions.forEach((exc, i) => {
-      addRow(
-        i === 0 ? "Excursions & activites" : "",
-        exc.nom,
-        "1 × " + money(exc.prix),
-        exc.prix
-      );
-    });
-  } else if (couts.excursions) {
-    const e = couts.excursions;
-    addRow("Excursions & activites", e.detail, "-", e.total ?? e.montant);
-  }
-
-  if (couts.transferts) {
-    const t = couts.transferts;
-    addRow("Transferts", t.detail, "-", t.total ?? t.montant);
-  }
-  if (couts.assurance) {
-    const a = couts.assurance;
-    addRow("Assurance voyage", a.detail, "-", a.total ?? a.montant);
-  }
-  if (couts.divers) {
-    const d = couts.divers;
-    addRow("Divers & assurance", d.detail, "-", d.total ?? d.montant);
-  }
-
-  if (tableRows.length > 0) {
-    y = guard(doc, y, 20);
-
-    autoTable(doc, {
-      startY: y,
-      head: [["Poste", "Detail", "Qte x P.U.", "Montant"]],
-      body: tableRows,
-      foot: [[
-        {
-          content: "TOTAL TTC",
-          styles: { fontStyle: "bold", textColor: OCEAN, fontSize: 10 },
-        },
-        {
-          content: budgetMode === "personne" ? "Prix par personne" : "Prix total groupe",
-          styles: { textColor: MIST, fontStyle: "italic" },
-          colSpan: 2,
-        },
-        {
-          content: money(totalFinal),
-          styles: { fontStyle: "bold", textColor: TERRA, fontSize: 12 },
-        },
-      ]],
-      theme: "plain",
-      styles: {
-        font: "helvetica",
-        fontSize: 8.5,
-        cellPadding: { top: 3.5, right: 4, bottom: 3.5, left: 4 },
-        textColor: OCEAN,
-        lineColor: BORDER,
-        lineWidth: 0.3,
-      },
-      headStyles: {
-        fillColor: OCEAN,
-        textColor: GOLD,
-        fontStyle: "bold",
-        fontSize: 7.5,
-        cellPadding: { top: 4.5, right: 4, bottom: 4.5, left: 4 },
-      },
-      footStyles: {
-        fillColor: TERRA_L,
-        lineWidth: 0,
-        cellPadding: { top: 5, right: 4, bottom: 5, left: 4 },
-      },
-      columnStyles: {
-        0: { fontStyle: "bold", cellWidth: 46 },
-        1: { textColor: MIST },
-        2: { textColor: MIST, cellWidth: 36 },
-        3: { halign: "right", fontStyle: "bold", cellWidth: 36 },
-      },
-      alternateRowStyles: { fillColor: CREAM },
-      margin: { left: MARGIN, right: MARGIN },
-    });
-
-    y = (doc.lastAutoTable?.finalY ?? y) + 12;
-  }
-
   // ── BON À SAVOIR ─────────────────────────────────────────────────────
-
   if (conseilsPratiques.length > 0) {
     y = guard(doc, y, 20);
-    y = sectionBar(doc, y, "BON A SAVOIR - CONSEILS D'EXPERT");
+    y = sectionBar(doc, y, "BON A SAVOIR", "Conseils d'expert");
 
     conseilsPratiques.forEach((conseil) => {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8.5);
-      const lines = doc.splitTextToSize(conseil, CW - 14);
+      const lines = doc.splitTextToSize(sanitize(conseil), CW - 14);
       const h = lines.length * 5.2 + 5;
 
       y = guard(doc, y, h);
 
-      // Puce Gold
       doc.setFillColor(...GOLD);
       doc.circle(MARGIN + 3.5, y + 2.5, 1.8, "F");
 
@@ -544,7 +559,6 @@ export async function generatePdf(devis, formData = {}, profile = {}) {
   }
 
   // ── MENTIONS LÉGALES ─────────────────────────────────────────────────
-
   const atoutNum = profile?.atout_france_num   || null;
   const garantie = profile?.garantie_financiere || "APST";
   const rcpAssur = profile?.rcp_assurance       || "AXA France";
@@ -561,12 +575,15 @@ export async function generatePdf(devis, formData = {}, profile = {}) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(6.5);
   let legalH = 10;
-  legal.forEach((l) => {
-    legalH += doc.splitTextToSize(l, CW - 10).length * 4.5 + 1.5;
-  });
+  legal.forEach((l) => { legalH += doc.splitTextToSize(l, CW - 10).length * 4.5 + 1.5; });
   legalH += 6;
 
-  y = guard(doc, y, legalH + 4);
+  // Toujours en bas de la dernière page, juste au-dessus du footer
+  const legalPinY = FOOT_Y - legalH - 3;
+  if (y > legalPinY) {
+    addPage(doc);
+  }
+  y = legalPinY;
 
   doc.setFillColor(243, 242, 240);
   doc.setDrawColor(...BORDER);
@@ -588,15 +605,12 @@ export async function generatePdf(devis, formData = {}, profile = {}) {
     ly += ls.length * 4.5 + 1.5;
   });
 
-  // ── PIEDS DE PAGE (toutes les pages) ────────────────────────────────
-
+  // ── PIEDS DE PAGE ────────────────────────────────────────────────────
   const totalPages = doc.internal.getNumberOfPages();
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p);
     drawFooter(doc, p, totalPages, ref);
   }
-
-  // ── SAUVEGARDE ───────────────────────────────────────────────────────
 
   doc.save(`Devis-Qovee-${ref}.pdf`);
 }

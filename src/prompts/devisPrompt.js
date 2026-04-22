@@ -161,6 +161,10 @@ Structure EXACTE attendue :
       "detail": "Transferts privés aéroport A/R + transfert inter-hôtels Seminyak→Ubud",
       "total": 185
     },
+    "location": {
+      "detail": "Location SUV automatique 7 jours, assurance incluse — Europcar",
+      "total": 560
+    },
     "assurance": {
       "detail": "Assurance voyage multirisque 12 jours — 2 personnes (annulation, assistance médicale, bagages)",
       "total": 98
@@ -191,7 +195,8 @@ Structure EXACTE attendue :
 - Commence directement par { et termine par }.
 - Tous les guillemets à l'intérieur des chaînes doivent être échappés avec \\".
 - Les valeurs numériques (prix, totaux) sont des nombres, jamais des chaînes.
-- Le JSON doit être complet — ne tronque jamais la réponse en cours de route.`;
+- Le JSON doit être complet — ne tronque jamais la réponse en cours de route.
+- INTERDIT : n'utilise jamais le tiret cadratin (—) ni le tiret demi-cadratin (–) comme séparateur entre deux éléments dans une phrase. Utilise une virgule à la place. Ces tirets longs ne s'emploient qu'en français pour les dialogues ou la césure typographique, jamais comme séparateur inline.`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -210,20 +215,39 @@ function buildUserPrompt(formData = {}) {
     datesFlexibles     = false,
     typesExperience    = [],
     contraintes        = "",
+    aeroportDepart     = "",
+    aeroportArrivee    = "",
     compagnieAerienne  = "",
     prixVols           = "",
     nomHotel           = "",
     etoilesHotel       = "",
     prixHotel          = "",
+    formuleHotel       = "",
     transfertInclus    = false,
     prixTransfert      = "",
     nomTransporteur    = "",
+    locationVehicule   = false,
+    nomLoueur          = "",
+    typeVehicule       = "",
+    prixLocation       = "",
   } = formData;
+
+  // Parse une date "jj/mm/aaaa" (format formulaire français) en objet Date
+  function parseFrDate(str) {
+    if (!str) return null;
+    if (str.includes("/")) {
+      const [d, m, y] = str.split("/");
+      return new Date(`${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`);
+    }
+    return new Date(str);
+  }
 
   // Calcul durée si dates disponibles
   let duree = "";
   if (dateDebut && dateFin) {
-    const diff = Math.round((new Date(dateFin) - new Date(dateDebut)) / 86400000);
+    const d1 = parseFrDate(dateDebut);
+    const d2 = parseFrDate(dateFin);
+    const diff = Math.round((d2 - d1) / 86400000);
     if (diff > 0) duree = `${diff} nuit${diff > 1 ? "s" : ""} (${diff + 1} jours)`;
   }
 
@@ -262,16 +286,22 @@ function buildUserPrompt(formData = {}) {
   if (contraintes)        lines.push(`- Contraintes       : ${contraintes}`);
 
   // Données prérenseignées (vol, hôtel, transfert)
-  const hasPreset = compagnieAerienne || prixVols || nomHotel || etoilesHotel || prixHotel || transfertInclus;
+  const hasPreset = compagnieAerienne || prixVols || nomHotel || etoilesHotel || prixHotel || transfertInclus || locationVehicule;
   if (hasPreset) {
     lines.push(``);
     lines.push(`DONNÉES PRÉRENSEIGNÉES PAR L'AGENT (à utiliser EXACTEMENT, sans modifier) :`);
+    if (aeroportDepart)    lines.push(`- Aéroport de départ : ${aeroportDepart}`);
+    if (aeroportArrivee)   lines.push(`- Aéroport d'arrivée : ${aeroportArrivee}`);
     if (compagnieAerienne) lines.push(`- Compagnie aérienne : ${compagnieAerienne}`);
     if (prixVols)          lines.push(`- Prix vols (total)  : ${Number(prixVols).toLocaleString("fr-FR")} €`);
     if (nomHotel)          lines.push(`- Hôtel              : ${nomHotel}${etoilesHotel ? ` (${etoilesHotel}★)` : ""}`);
+    if (formuleHotel)      lines.push(`- Formule            : ${formuleHotel}`);
     if (prixHotel)         lines.push(`- Prix hôtel         : ${Number(prixHotel).toLocaleString("fr-FR")} €/nuit`);
     if (transfertInclus) {
       lines.push(`- Transfert          : Inclus${nomTransporteur ? ` — transporteur : ${nomTransporteur}` : ""}${prixTransfert ? ` — prix : ${Number(prixTransfert).toLocaleString("fr-FR")} €` : ""}`);
+    }
+    if (locationVehicule) {
+      lines.push(`- Location véhicule  : Incluse${nomLoueur ? ` — loueur : ${nomLoueur}` : ""}${typeVehicule ? ` — véhicule : ${typeVehicule}` : ""}${prixLocation ? ` — prix total : ${Number(prixLocation).toLocaleString("fr-FR")} €` : ""}`);
     }
   }
 

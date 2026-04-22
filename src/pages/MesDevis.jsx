@@ -320,7 +320,7 @@ export default function MesDevis() {
               CSV
             </button>}
 
-            <button className="cta-btn mes-devis-new" onClick={() => navigate("/")}>+ Nouveau devis</button>
+            <button className="cta-btn mes-devis-new" onClick={() => navigate("/creer")}>+ Nouveau devis</button>
           </div>
         </div>
 
@@ -505,6 +505,10 @@ export default function MesDevis() {
               {selected.generated_content && (
                 <button className="card-action-btn card-action-pdf" onClick={(e) => downloadPdf(selected, e)}>Télécharger PDF</button>
               )}
+              <button className="card-action-btn card-action-delete" onClick={(e) => deleteDevis(selected.id, e)} title="Supprimer ce devis">
+                <svg viewBox="0 0 14 14" fill="none" width="11" height="11"><path d="M2 4h10M5 4V2h4v2M11 4l-.8 8H3.8L3 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                Supprimer
+              </button>
             </div>
             <div className="modal-body">
               {selected.generated_content ? (
@@ -512,7 +516,7 @@ export default function MesDevis() {
                   <DevisResult
                     devis={selected.generated_content}
                     onReset={() => setSelected(null)}
-                    onRegenerate={() => { setSelected(null); navigate("/"); }}
+                    onRegenerate={() => { setSelected(null); navigate("/creer", { state: { prefillForm: rowToFormData(selected) } }); }}
                     onPdf={async () => await generatePdf(selected.generated_content, rowToFormData(selected), profile)}
                   />
                 </div>

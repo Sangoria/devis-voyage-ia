@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { updateDevisContent } from "../lib/supabase";
+import { normalizeDevis } from "../lib/normalizeDevis";
 
 function formatDate(dateStr) {
   if (!dateStr) return null;
@@ -43,72 +44,24 @@ function WarnIcon() {
   );
 }
 
-function CostRow({ label, detail, prixUnitaire, quantite, total, unite }) {
+function CostRow({ ligne }) {
+  const { label, detail, prixUnitaire, quantite, unite, montant } = ligne;
   const qtyLabel = quantite && prixUnitaire
     ? `${quantite} ${unite || "×"} ${money(prixUnitaire)}`
     : null;
   return (
     <div className="dr-cost-row">
       <span className="dr-cost-label">{label}</span>
-      <span className="dr-cost-detail">{detail}</span>
+      {detail && <span className="dr-cost-detail">{detail}</span>}
       {qtyLabel && <span className="dr-cost-qty">{qtyLabel}</span>}
-      <span className="dr-cost-amount">{money(total)}</span>
+      <span className="dr-cost-amount">{money(montant)}</span>
     </div>
   );
 }
 
-// Aplatit les couts structurés en tableau de lignes éditables
-function flattenCouts(couts) {
-  const lignes = [];
-  if (couts.vols)
-    lignes.push({ id: "vols", label: "Vols A/R", montant: Number(couts.vols.total ?? couts.vols.montant ?? 0) });
-  if (couts.hebergement)
-    lignes.push({ id: "hebergement", label: "Hébergement", montant: Number(couts.hebergement.total ?? couts.hebergement.montant ?? 0) });
-  if (Array.isArray(couts.excursions)) {
-    couts.excursions.forEach((exc, i) =>
-      lignes.push({ id: `exc_${i}`, label: exc.nom || "Excursion", montant: Number(exc.prix ?? 0) })
-    );
-  } else if (couts.excursions) {
-    lignes.push({ id: "excursions", label: "Excursions & activités", montant: Number(couts.excursions.total ?? couts.excursions.montant ?? 0) });
-  }
-  if (couts.transferts)
-    lignes.push({ id: "transferts", label: "Transferts", montant: Number(couts.transferts.total ?? couts.transferts.montant ?? 0) });
-  if (couts.assurance)
-    lignes.push({ id: "assurance", label: "Assurance voyage", montant: Number(couts.assurance.total ?? couts.assurance.montant ?? 0) });
-  if (couts.divers)
-    lignes.push({ id: "divers", label: "Divers & assurance", montant: Number(couts.divers.total ?? couts.divers.montant ?? 0) });
-  return lignes;
-}
-
-function buildDraft(devis) {
-  const couts = devis.couts ?? {};
-  const lignes = devis.lignes_editees ?? flattenCouts(couts);
-  return {
-    titre    : devis.titre ?? "",
-    resume   : devis.resume ?? "",
-    itineraire: (devis.itineraire ?? []).map((j) => ({
-      ...j,
-      titre      : j.titre ?? "",
-      activites  : Array.isArray(j.activites)
-        ? j.activites
-        : [j.matin, j.apresmidi, j.soir].filter(Boolean),
-    })),
-    lignes,
-    conseilsPratiques: [...(devis.conseilsPratiques ?? [])],
-  };
-}
-
 // ── Mode lecture ──────────────────────────────────────────────────────────────
-function ReadView({ devis, onEdit, onRegenerate, onPdf, onReset }) {
-  const {
-    titre = "", resume = "", itineraire = [], couts = {},
-    total_ttc, totalTTC, conseilsPratiques = [], avertissements = [],
-    lignes_editees,
-  } = devis;
-
-  const totalFinal = total_ttc ?? totalTTC ?? 0;
-  const excursions = Array.isArray(couts.excursions) ? couts.excursions : [];
-  const totalExcursions = excursions.reduce((s, e) => s + Number(e.prix || 0), 0);
+function ReadView({ normalized, onEdit, onRegenerate, onPdf, onReset }) {
+  const { titre, resume, itineraire, lignes, total_ttc, conseilsPratiques, avertissements } = normalized;
 
   return (
     <div className="dr-root">
@@ -136,9 +89,6 @@ function ReadView({ devis, onEdit, onRegenerate, onPdf, onReset }) {
             {itineraire.map((jour, i) => {
               const isLast = i === itineraire.length - 1;
               const date   = formatDate(jour.date);
-              const activites = Array.isArray(jour.activites)
-                ? jour.activites
-                : [jour.matin, jour.apresmidi, jour.soir].filter(Boolean);
               return (
                 <div key={i} className={`dr-tl-item${isLast ? " dr-tl-last" : ""}`}>
                   <div className="dr-tl-col">
@@ -151,9 +101,9 @@ function ReadView({ devis, onEdit, onRegenerate, onPdf, onReset }) {
                       {date && <span className="dr-tl-date">{date}</span>}
                     </div>
                     {jour.titre && <div className="dr-tl-title">{jour.titre}</div>}
-                    {activites.length > 0 && (
+                    {jour.activites.length > 0 && (
                       <ul className="dr-activites">
-                        {activites.map((a, j) => (
+                        {jour.activites.map((a, j) => (
                           <li key={j} className="dr-activite-item">
                             <span className="dr-activite-dot" />
                             <span>{a}</span>
@@ -190,52 +140,16 @@ function ReadView({ devis, onEdit, onRegenerate, onPdf, onReset }) {
         </div>
       )}
 
-      {/* Coûts — lignes éditées ou structure originale */}
-      {(lignes_editees || Object.keys(couts).length > 0) && (
+      {lignes.length > 0 && (
         <div className="dr-section">
           <div className="dr-section-label">Détail des coûts</div>
           <div className="dr-costs">
-            {lignes_editees ? (
-              lignes_editees.map((l, i) => (
-                <div key={i} className="dr-cost-row">
-                  <span className="dr-cost-label">{l.label}</span>
-                  <span className="dr-cost-amount">{money(l.montant)}</span>
-                </div>
-              ))
-            ) : (
-              <>
-                {couts.vols && <CostRow label="Vols A/R" detail={couts.vols.detail} prixUnitaire={couts.vols.prix_unitaire} quantite={couts.vols.quantite} total={couts.vols.total ?? couts.vols.montant} unite="pers." />}
-                {couts.hebergement && <CostRow label="Hébergement" detail={couts.hebergement.detail} prixUnitaire={couts.hebergement.prix_unitaire} quantite={couts.hebergement.quantite} total={couts.hebergement.total ?? couts.hebergement.montant} unite="nuits" />}
-                {excursions.length > 0 && (
-                  <div className="dr-cost-row dr-cost-row-group">
-                    <span className="dr-cost-label">Excursions & activités</span>
-                    <div className="dr-excursions-list">
-                      {excursions.map((exc, i) => (
-                        <div key={i} className="dr-excursion-item">
-                          <span className="dr-excursion-name">{exc.nom}</span>
-                          <span className="dr-cost-amount">{money(exc.prix)}</span>
-                        </div>
-                      ))}
-                      {excursions.length > 1 && (
-                        <div className="dr-excursion-subtotal">
-                          <span>Sous-total excursions</span>
-                          <span className="dr-cost-amount">{money(totalExcursions)}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-                {!Array.isArray(couts.excursions) && couts.excursions && <CostRow label="Excursions & activités" detail={couts.excursions.detail} total={couts.excursions.total ?? couts.excursions.montant} />}
-                {couts.transferts && <CostRow label="Transferts" detail={couts.transferts.detail} total={couts.transferts.total ?? couts.transferts.montant} />}
-                {couts.assurance && <CostRow label="Assurance voyage" detail={couts.assurance.detail} total={couts.assurance.total ?? couts.assurance.montant} />}
-                {couts.divers && <CostRow label="Divers & assurance" detail={couts.divers.detail} total={couts.divers.total ?? couts.divers.montant} />}
-              </>
-            )}
+            {lignes.map((l) => <CostRow key={l.id} ligne={l} />)}
           </div>
-          {totalFinal > 0 && (
+          {total_ttc > 0 && (
             <div className="dr-total">
               <span className="dr-total-label">Total TTC</span>
-              <span className="dr-total-amount">{money(totalFinal)}</span>
+              <span className="dr-total-amount">{money(total_ttc)}</span>
             </div>
           )}
         </div>
@@ -270,14 +184,19 @@ function ReadView({ devis, onEdit, onRegenerate, onPdf, onReset }) {
 }
 
 // ── Mode édition ──────────────────────────────────────────────────────────────
-function EditView({ devis, savedDevisId, onCancel, onSaved, onPdf }) {
-  const [draft,   setDraft]   = useState(() => buildDraft(devis));
+function EditView({ normalized, raw, savedDevisId, onCancel, onSaved, onPdf }) {
+  const [draft, setDraft] = useState({
+    titre: normalized.titre,
+    resume: normalized.resume,
+    itineraire: normalized.itineraire,
+    lignes: normalized.lignes,
+    conseilsPratiques: [...normalized.conseilsPratiques],
+  });
   const [saving,  setSaving]  = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
 
   const total = draft.lignes.reduce((s, l) => s + Number(l.montant || 0), 0);
 
-  // Itinéraire
   function setJourTitre(i, val) {
     setDraft((d) => {
       const it = [...d.itineraire];
@@ -293,7 +212,6 @@ function EditView({ devis, savedDevisId, onCancel, onSaved, onPdf }) {
     });
   }
 
-  // Lignes de coûts
   function setLigne(i, field, val) {
     setDraft((d) => {
       const lignes = [...d.lignes];
@@ -304,25 +222,29 @@ function EditView({ devis, savedDevisId, onCancel, onSaved, onPdf }) {
   function addLigne() {
     setDraft((d) => ({
       ...d,
-      lignes: [...d.lignes, { id: `custom_${Date.now()}`, label: "Nouvelle ligne", montant: 0 }],
+      lignes: [...d.lignes, { id: `custom_${Date.now()}`, label: "Nouvelle ligne", detail: null, prixUnitaire: null, quantite: null, unite: null, montant: 0 }],
     }));
   }
   function removeLigne(i) {
     setDraft((d) => ({ ...d, lignes: d.lignes.filter((_, j) => j !== i) }));
   }
 
+  function buildUpdated() {
+    return {
+      ...raw,
+      titre: draft.titre,
+      resume: draft.resume,
+      itineraire: draft.itineraire,
+      lignes_editees: draft.lignes,
+      conseilsPratiques: draft.conseilsPratiques,
+      total_ttc: total,
+    };
+  }
+
   async function handleSave() {
     setSaving(true);
     setSaveMsg("");
-    const updated = {
-      ...devis,
-      titre              : draft.titre,
-      resume             : draft.resume,
-      itineraire         : draft.itineraire,
-      lignes_editees     : draft.lignes,
-      conseilsPratiques  : draft.conseilsPratiques,
-      total_ttc          : total,
-    };
+    const updated = buildUpdated();
     if (savedDevisId) {
       const { error } = await updateDevisContent(savedDevisId, updated);
       if (error) { setSaveMsg("Erreur lors de la sauvegarde."); setSaving(false); return; }
@@ -332,28 +254,12 @@ function EditView({ devis, savedDevisId, onCancel, onSaved, onPdf }) {
     setSaving(false);
   }
 
-  function handlePdfEdit() {
-    const updated = {
-      ...devis,
-      titre             : draft.titre,
-      resume            : draft.resume,
-      itineraire        : draft.itineraire,
-      lignes_editees    : draft.lignes,
-      conseilsPratiques : draft.conseilsPratiques,
-      total_ttc         : total,
-    };
-    onPdf(updated);
-  }
-
   return (
     <div className="dr-root">
-
-      {/* Bandeau mode édition */}
       <div className="dr-edit-banner">
         <EditIcon /> Mode édition — les modifications sont appliquées au PDF
       </div>
 
-      {/* Titre & résumé */}
       <div className="dr-section">
         <div className="dr-section-label">En-tête du devis</div>
         <div className="dr-edit-field">
@@ -368,7 +274,6 @@ function EditView({ devis, savedDevisId, onCancel, onSaved, onPdf }) {
         </div>
       </div>
 
-      {/* Itinéraire */}
       {draft.itineraire.length > 0 && (
         <div className="dr-section">
           <div className="dr-section-label">Programme jour par jour</div>
@@ -391,7 +296,6 @@ function EditView({ devis, savedDevisId, onCancel, onSaved, onPdf }) {
         </div>
       )}
 
-      {/* Lignes de coûts */}
       <div className="dr-section">
         <div className="dr-section-label">Détail des coûts</div>
         <div className="dr-edit-lignes">
@@ -428,24 +332,21 @@ function EditView({ devis, savedDevisId, onCancel, onSaved, onPdf }) {
         </div>
       </div>
 
-      {/* Message sauvegarde */}
       {saveMsg && (
         <div className="dr-save-msg" style={{ color: saveMsg.includes("Erreur") ? "#c0392b" : "var(--terra)" }}>
           {saveMsg}
         </div>
       )}
 
-      {/* Actions */}
       <div className="dr-actions">
         <button className="dr-btn dr-btn-primary" onClick={handleSave} disabled={saving}>
           {saving ? "Sauvegarde…" : "Sauvegarder les modifications"}
         </button>
-        <button className="dr-btn dr-btn-secondary" onClick={handlePdfEdit}>
+        <button className="dr-btn dr-btn-secondary" onClick={() => onPdf(buildUpdated())}>
           <PdfIcon /> PDF avec modifications
         </button>
         <button className="dr-btn dr-btn-ghost" onClick={onCancel}>Annuler</button>
       </div>
-
     </div>
   );
 }
@@ -453,38 +354,36 @@ function EditView({ devis, savedDevisId, onCancel, onSaved, onPdf }) {
 // ── Composant principal ───────────────────────────────────────────────────────
 export default function DevisResult({ devis, onReset, onRegenerate, onPdf, onSaved, savedDevisId }) {
   const [editMode, setEditMode] = useState(false);
-  const [current,  setCurrent]  = useState(devis);
+  const [raw, setRaw] = useState(devis);
 
-  if (!current) return null;
+  const normalized = normalizeDevis(raw);
+  if (!normalized) return null;
 
   function handleSaved(updated) {
-    setCurrent(updated);
+    setRaw(updated);
     if (onSaved) onSaved(updated);
     setEditMode(false);
-  }
-
-  function handlePdfEdit(updated) {
-    onPdf(updated);
   }
 
   if (editMode) {
     return (
       <EditView
-        devis={current}
+        normalized={normalized}
+        raw={raw}
         savedDevisId={savedDevisId}
         onCancel={() => setEditMode(false)}
         onSaved={handleSaved}
-        onPdf={handlePdfEdit}
+        onPdf={onPdf}
       />
     );
   }
 
   return (
     <ReadView
-      devis={current}
+      normalized={normalized}
       onEdit={() => setEditMode(true)}
       onRegenerate={onRegenerate}
-      onPdf={() => onPdf(current)}
+      onPdf={() => onPdf(raw)}
       onReset={onReset}
     />
   );
