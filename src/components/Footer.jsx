@@ -52,24 +52,39 @@ export default function Footer() {
           </span>
         </div>
 
-        {/* CENTRE — Liens légaux */}
-        <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "0.5rem", justifyContent: "center" }}>
-          {LINKS.map(({ to, label }, i) => (
-            <span key={to} style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
-              <Link to={to} style={{
-                fontFamily     : "var(--font-mono)",
-                fontSize       : "0.828rem",
-                color          : "var(--mist)",
-                textDecoration : "none",
-                letterSpacing  : "0.04em",
-                transition     : "color 0.2s",
-              }}
-                onMouseEnter={e => e.currentTarget.style.color = "var(--sand)"}
-                onMouseLeave={e => e.currentTarget.style.color = "var(--mist)"}
-              >{label}</Link>
-              {i < LINKS.length - 1 && <span style={{ color: "#8A9BA8" }}>·</span>}
-            </span>
-          ))}
+        {/* CENTRE — Liens légaux + contact */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem" }}>
+          <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "0.5rem", justifyContent: "center" }}>
+            {LINKS.map(({ to, label }, i) => (
+              <span key={to} style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+                <Link to={to} style={{
+                  fontFamily     : "var(--font-mono)",
+                  fontSize       : "0.828rem",
+                  color          : "var(--mist)",
+                  textDecoration : "none",
+                  letterSpacing  : "0.04em",
+                  transition     : "color 0.2s",
+                }}
+                  onMouseEnter={e => e.currentTarget.style.color = "var(--sand)"}
+                  onMouseLeave={e => e.currentTarget.style.color = "var(--mist)"}
+                >{label}</Link>
+                {i < LINKS.length - 1 && <span style={{ color: "#8A9BA8" }}>·</span>}
+              </span>
+            ))}
+          </div>
+          <a href="mailto:contact.qovee@gmail.com" style={{
+            fontFamily     : "var(--font-mono)",
+            fontSize       : "0.828rem",
+            color          : "var(--mist)",
+            textDecoration : "none",
+            letterSpacing  : "0.04em",
+            transition     : "color 0.2s",
+          }}
+            onMouseEnter={e => e.currentTarget.style.color = "var(--terra)"}
+            onMouseLeave={e => e.currentTarget.style.color = "var(--mist)"}
+          >
+            contact.qovee@gmail.com
+          </a>
         </div>
 
         {/* DROITE — Baseline */}

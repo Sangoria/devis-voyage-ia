@@ -35,8 +35,28 @@ export default function Login() {
 
         {/* Logo */}
         <div className="auth-logo">
-          <img src="/favicon.png" width="72" height="72" alt="Qovee" />
-          <span className="auth-wordmark">QOVEE</span>
+          <span style={{
+            fontFamily    : "var(--font-sans)",
+            fontSize      : "3.63rem",
+            fontWeight    : 700,
+            color         : "var(--sand)",
+            letterSpacing : "-0.02em",
+            lineHeight    : 1,
+          }}>
+            <span style={{ position: "relative", color: "var(--terra)" }}>
+              Q
+              <span style={{
+                position     : "absolute",
+                width        : "0.099em",
+                height       : "0.099em",
+                background   : "var(--gold)",
+                borderRadius : "50%",
+                bottom       : "0.24em",
+                right        : "0.400em",
+              }} />
+            </span>
+            <span style={{ color: "var(--ocean)" }}>ovee</span>
+          </span>
         </div>
 
         <h1 className="auth-title">Connexion</h1>

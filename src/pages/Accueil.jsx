@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
@@ -25,6 +25,69 @@ const FAQ_ITEMS = [
     a: "Oui, un humain répond, pas un bot. Par email ou par message direct. En général sous 24h ouvrées.",
   },
 ];
+
+const HOW_STEPS = [
+  { n: "01", title: "Décris la demande client", desc: "En langage naturel, directement depuis le message de ton client." },
+  { n: "02", title: "Qovee structure tout", desc: "Vols, hôtels, excursions, transferts : organisés et chiffrés automatiquement." },
+  { n: "03", title: "Télécharge le PDF pro", desc: "Un devis complet, prêt à envoyer au client en un clic." },
+];
+
+function HowItWorks() {
+  const sectionRef = useRef(null);
+  const [visible, setVisible] = useState([false, false, false]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          HOW_STEPS.forEach((_, i) => {
+            setTimeout(() => {
+              setVisible((prev) => {
+                const next = [...prev];
+                next[i] = true;
+                return next;
+              });
+            }, i * 450);
+          });
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 }
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section className="landing-how" ref={sectionRef}>
+      <div className="landing-inner">
+        <h2 className="how-title-main">Comment ça marche ?</h2>
+        <div className="how-steps">
+          {HOW_STEPS.map((s, i) => (
+            <React.Fragment key={s.n}>
+              <div className={`how-step how-step--anim${visible[i] ? " how-step--visible" : ""}`}>
+                <span className="how-num">{s.n}</span>
+                <h3 className="how-title">{s.title}</h3>
+                <p className="how-desc">{s.desc}</p>
+              </div>
+              {i < HOW_STEPS.length - 1 && (
+                <div className={`how-arrow${visible[i] ? " how-arrow--visible" : ""}`}>
+                  <svg viewBox="0 0 60 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 12 H48" stroke="#C4714A" strokeWidth="2" strokeLinecap="round"
+                      className="how-arrow-line" />
+                    <path d="M42 5 L54 12 L42 19" stroke="#C4714A" strokeWidth="2"
+                      strokeLinecap="round" strokeLinejoin="round"
+                      className="how-arrow-head" />
+                  </svg>
+                </div>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 function FaqItem({ q, a }) {
   const [open, setOpen] = useState(false);
@@ -122,23 +185,7 @@ export default function Accueil() {
       </section>
 
       {/* ── Comment ça marche ── */}
-      <section className="landing-how">
-        <div className="landing-inner">
-          <div className="how-steps">
-            {[
-              { n: "01", title: "Décris la demande client", desc: "En langage naturel, directement depuis le message de ton client." },
-              { n: "02", title: "Qovee structure tout", desc: "Vols, hôtels, excursions, transferts : organisés et chiffrés automatiquement." },
-              { n: "03", title: "Télécharge le PDF pro", desc: "Un devis complet, prêt à envoyer au client en un clic." },
-            ].map((s) => (
-              <div key={s.n} className="how-step">
-                <span className="how-num">{s.n}</span>
-                <h3 className="how-title">{s.title}</h3>
-                <p className="how-desc">{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <HowItWorks />
 
       {/* ── Pourquoi Qovee ── */}
       <section className="landing-why">
@@ -175,9 +222,10 @@ export default function Accueil() {
                   { text: "20 devis premium/mois",   included: true  },
                   { text: "Export PDF pro",            included: true  },
                   { text: "Historique des devis",      included: true  },
-                  { text: "Branding agence sur PDF",   included: false },
-                  { text: "Multi-utilisateurs",        included: false },
-                  { text: "Support humain",            included: true  },
+                  { text: "Branding agence sur PDF",          included: false },
+                  { text: "Multi-utilisateurs",               included: false },
+                  { text: "Tableau de bord & suivi clients",  included: false },
+                  { text: "Support humain",                   included: true  },
                 ],
               },
               {
@@ -190,9 +238,10 @@ export default function Accueil() {
                   { text: "Devis illimités",           included: true  },
                   { text: "Export PDF pro",            included: true  },
                   { text: "Historique des devis",      included: true  },
-                  { text: "Branding agence sur PDF",   included: true  },
-                  { text: "Multi-utilisateurs",        included: false },
-                  { text: "Support prioritaire",       included: true  },
+                  { text: "Branding agence sur PDF",          included: true  },
+                  { text: "Multi-utilisateurs",               included: false },
+                  { text: "Tableau de bord & suivi clients",  included: false },
+                  { text: "Support prioritaire",              included: true  },
                 ],
               },
               {
@@ -204,9 +253,10 @@ export default function Accueil() {
                   { text: "Devis illimités",              included: true },
                   { text: "Export PDF pro",               included: true },
                   { text: "Historique des devis",         included: true },
-                  { text: "Branding agence sur PDF",      included: true },
-                  { text: "Multi-utilisateurs",           included: true },
-                  { text: "Support prioritaire dédié",    included: true },
+                  { text: "Branding agence sur PDF",          included: true },
+                  { text: "Multi-utilisateurs",               included: true },
+                  { text: "Tableau de bord & suivi clients",  included: true },
+                  { text: "Support prioritaire dédié",        included: true },
                 ],
               },
             ].map((plan) => (
@@ -250,37 +300,6 @@ export default function Accueil() {
               <FaqItem key={i} q={item.q} a={item.a} />
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* ── CTA final ── */}
-      <section style={{
-        background : "#1C1611",
-        padding    : "5rem 1.5rem",
-        textAlign  : "center",
-      }}>
-        <div style={{ maxWidth: "600px", margin: "0 auto" }}>
-          <h2 style={{
-            fontFamily : "var(--font-serif, 'Cormorant Garamond', serif)",
-            fontSize   : "clamp(1.8rem, 5vw, 2.8rem)",
-            fontWeight : 600,
-            color      : "#FAF7F2",
-            margin     : "0 0 1rem",
-            lineHeight : 1.2,
-          }}>
-            Votre prochain devis,<br />prêt en 2 minutes.
-          </h2>
-          <p style={{
-            color      : "#A89485",
-            fontSize   : "1.05rem",
-            margin     : "0 0 2rem",
-            lineHeight : 1.6,
-          }}>
-            7 jours d'essai gratuit, sans carte bancaire.
-          </p>
-          <button className="hero-cta" onClick={handleCta}>
-            Essayer Qovee gratuitement →
-          </button>
         </div>
       </section>
 

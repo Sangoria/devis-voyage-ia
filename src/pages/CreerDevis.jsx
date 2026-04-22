@@ -41,7 +41,7 @@ const FORM_INIT = {
 };
 
 export default function CreerDevis() {
-  const { user, isSubscribed, hasQuota, devisCount, FREE_QUOTA, incrementDevisCount } = useAuth();
+  const { user, profile, isSubscribed, hasQuota, devisCount, FREE_QUOTA, incrementDevisCount } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -120,8 +120,9 @@ export default function CreerDevis() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleModify = () => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  const handlePdf    = async () => { if (devis) await generatePdf(devis, form, profile); };
+  const handleRegenerate = () => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const handlePdf        = async (devisData) => { await generatePdf(devisData ?? devis, form, profile); };
+  const handleSaved      = (updated) => setDevis(updated);
 
   return (
     <div className="app">
@@ -532,7 +533,14 @@ export default function CreerDevis() {
               </div>
             )}
             {!loading && devis && (
-              <DevisResult devis={devis} onReset={handleReset} onModify={handleModify} onPdf={handlePdf}/>
+              <DevisResult
+                devis={devis}
+                savedDevisId={savedDevisId}
+                onReset={handleReset}
+                onRegenerate={handleRegenerate}
+                onPdf={handlePdf}
+                onSaved={handleSaved}
+              />
             )}
           </div>
         )}

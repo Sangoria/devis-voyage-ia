@@ -318,34 +318,57 @@ export default function MonCompte() {
             )}
 
             {/* ── Abonnement ── */}
-            {activeSection === "Abonnement" && (
-              <div className="compte-card">
-                <h2 className="compte-card-title">Abonnement</h2>
-                <p className="compte-card-sub">Gérez votre formule et vos informations de facturation.</p>
+            {activeSection === "Abonnement" && (() => {
+              const plan = isSubscribed ? (profile?.subscription_plan ?? "solo") : null;
+              const PLAN_META = {
+                solo:   { label: "Solo",   desc: "1 utilisateur · 20 devis/mois",        color: "var(--ocean)" },
+                pro:    { label: "Pro",    desc: "3 utilisateurs · Devis illimités",      color: "var(--terra)" },
+                studio: { label: "Studio", desc: "5+ utilisateurs · Tableau de bord",     color: "var(--gold)"  },
+              };
+              const meta = plan ? PLAN_META[plan] : null;
+              return (
+                <div className="compte-card">
+                  <h2 className="compte-card-title">Abonnement</h2>
+                  <p className="compte-card-sub">Votre formule actuelle et vos informations de facturation.</p>
 
-                <div className="compte-sub-status">
-                  <div className={`compte-sub-badge${isSubscribed ? "" : " compte-sub-badge--free"}`}>
-                    {isSubscribed ? "✓ Abonnement actif" : "Essai gratuit"}
-                  </div>
-                  {profile?.subscription_status && (
-                    <span className="compte-sub-detail">{profile.subscription_status}</span>
+                  {meta ? (
+                    <div className="compte-plan-block">
+                      <div className="compte-plan-pill" style={{ borderColor: meta.color, color: meta.color }}>
+                        <svg viewBox="0 0 14 14" fill="none" width="12" height="12">
+                          <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.4"/>
+                          <path d="M4.5 7l2 2L9.5 5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        Forfait {meta.label}
+                      </div>
+                      <p className="compte-plan-desc">{meta.desc}</p>
+                    </div>
+                  ) : (
+                    <div className="compte-no-plan">
+                      <p className="compte-no-plan-text">
+                        Vous êtes en période d'essai gratuit.<br/>
+                        Passez à un forfait pour débloquer toutes les fonctionnalités.
+                      </p>
+                      <a href="/pricing" className="compte-plan-cta">
+                        <svg viewBox="0 0 18 18" fill="none" width="15" height="15">
+                          <path d="M9 2l2.4 4.9 5.4.8-3.9 3.8.9 5.3L9 14.2l-4.8 2.6.9-5.3L2.2 7.7l5.4-.8L9 2z"
+                            stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                        </svg>
+                        Choisir mon forfait →
+                      </a>
+                    </div>
+                  )}
+
+                  {portalError && <div className="compte-error">{portalError}</div>}
+
+                  {isSubscribed && (
+                    <button className="compte-save-btn" onClick={handlePortal} disabled={portalLoading}
+                      style={{ marginTop: "1rem" }}>
+                      {portalLoading ? <><span className="cta-spinner"/>Redirection…</> : "Gérer mon abonnement →"}
+                    </button>
                   )}
                 </div>
-
-                {portalError && <div className="compte-error">{portalError}</div>}
-
-                {isSubscribed ? (
-                  <button className="compte-save-btn" onClick={handlePortal} disabled={portalLoading}>
-                    {portalLoading ? <><span className="cta-spinner"/>Redirection…</> : "Gérer mon abonnement →"}
-                  </button>
-                ) : (
-                  <a href="/pricing" className="compte-save-btn"
-                    style={{ textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
-                    Passer à un abonnement →
-                  </a>
-                )}
-              </div>
-            )}
+              );
+            })()}
 
           </div>
         </div>

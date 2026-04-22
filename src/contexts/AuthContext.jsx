@@ -13,6 +13,7 @@ export function AuthProvider({ children }) {
   const [devisCount, setDevisCount] = useState(0);
 
   const isSubscribed = SUBSCRIBED_STATUSES.includes(profile?.subscription_status);
+  const isStudio     = isSubscribed && profile?.subscription_plan === "studio";
   const hasQuota     = isSubscribed || devisCount < FREE_QUOTA;
 
   // Charge le profil + le compteur de devis si l'user n'est pas abonné
@@ -84,7 +85,7 @@ export function AuthProvider({ children }) {
 
   const value = {
     user, profile, loading,
-    isSubscribed, hasQuota, devisCount, FREE_QUOTA,
+    isSubscribed, isStudio, hasQuota, devisCount, FREE_QUOTA,
     refreshProfile, incrementDevisCount,
     signUp, signIn, signOut,
   };

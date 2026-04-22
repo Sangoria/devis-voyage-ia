@@ -41,6 +41,20 @@ export async function saveDevis({ userId, formData, devisJson }) {
   return supabase.from("devis").insert(row).select().single();
 }
 
+/** Met à jour le contenu édité d'un devis. */
+export async function updateDevisContent(id, devisJson) {
+  return supabase
+    .from("devis")
+    .update({
+      generated_content : devisJson,
+      total_price       : devisJson.total_ttc ?? null,
+      title             : devisJson.titre ?? "",
+    })
+    .eq("id", id)
+    .select()
+    .single();
+}
+
 /** Met à jour le statut d'un devis. */
 export async function updateDevisStatus(id, status) {
   const patch = { status };

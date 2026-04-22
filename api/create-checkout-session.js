@@ -31,7 +31,7 @@ export default async function handler(req, res) {
         trial_period_days: 7,
         metadata         : { user_id: userId },
       },
-      metadata    : { user_id: userId },
+      metadata    : { user_id: userId, plan },
       success_url : `${frontendUrl}/mes-devis?checkout=success`,
       cancel_url  : `${frontendUrl}/pricing`,
       locale      : "fr",

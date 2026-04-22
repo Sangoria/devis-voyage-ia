@@ -52,6 +52,7 @@ export default async function handler(req, res) {
           stripe_customer_id  : session.customer,
           subscription_status : "active",
           subscription_id     : session.subscription,
+          subscription_plan   : session.metadata?.plan ?? "solo",
         }).eq("id", userId);
       }
       break;
