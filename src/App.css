@@ -107,7 +107,7 @@ body {
 }
 .nav-name  {
   font-family: var(--font-sans);
-  font-size: 4.4rem;
+  font-size: 4.62rem;
   font-weight: 700;
   color: var(--ocean);
   letter-spacing: -0.03em;
@@ -115,7 +115,7 @@ body {
 }
 .nav-name-q {
   position: relative;
-  font-size: 5.06rem;
+  font-size: 5.31rem;
   color: var(--terra);
 }
 .nav-name-q::after {
@@ -1489,7 +1489,7 @@ input[type="date"] { padding-left: 2.5rem; }
     padding: 0 16px;
     height: 60px;
   }
-  .nav-name { font-size: 1.25rem; }
+  .nav-name { font-size: 1.31rem; }
   .nav-logo { width: 28px; height: 28px; }
   .nav-agency { display: none; }
   .nav-btn-pro { display: none; }
@@ -2714,7 +2714,7 @@ input[type="date"] { padding-left: 2.5rem; }
   gap: 1rem;
   background: rgba(255,255,255,0.05);
   border: 1px solid var(--terra);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius);
   padding: 2rem 1.75rem;
 }
 .how-num {

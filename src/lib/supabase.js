@@ -17,6 +17,15 @@ export const supabase = createClient(
 
 // ── Helpers devis ────────────────────────────────────────────────────────────
 
+function frDateToIso(str) {
+  if (!str) return null;
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) {
+    const [d, m, y] = str.split("/");
+    return `${y}-${m}-${d}`;
+  }
+  return str;
+}
+
 /** Sauvegarde un devis généré par Claude en base. Retourne { data, error }. */
 export async function saveDevis({ userId, formData, devisJson }) {
   const row = {
@@ -27,8 +36,8 @@ export async function saveDevis({ userId, formData, devisJson }) {
     group_type         : formData.typeGroupe?.toLowerCase() || null,
     budget             : Number(formData.budget)    || null,
     budget_type        : formData.budgetMode === "personne" ? "par_personne" : "total",
-    start_date         : formData.dateDebut         || null,
-    end_date           : formData.dateFin           || null,
+    start_date         : frDateToIso(formData.dateDebut) || null,
+    end_date           : frDateToIso(formData.dateFin)   || null,
     dates_flexibles    : formData.datesFlexibles    ?? false,
     experience_type    : formData.typesExperience?.length ? formData.typesExperience : null,
     client_description : formData.demandeClient     ?? "",

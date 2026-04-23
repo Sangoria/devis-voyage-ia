@@ -427,7 +427,7 @@ export default function CreerDevis() {
                     <span className="label-optional"> · optionnel</span>
                   </label>
                   <div className="groupe-chips" style={{ marginTop: "0.25rem" }}>
-                    {["Aucun", "Demi-pension", "Pension complète", "Tout compris"].map((r) => (
+                    {["Aucune", "Petit-déjeuner", "Demi-pension", "Pension complète", "Tout compris"].map((r) => (
                       <button key={r} type="button"
                         className={`groupe-chip${form.formuleHotel === r ? " active" : ""}`}
                         onClick={() => setForm((f) => ({ ...f, formuleHotel: f.formuleHotel === r ? "" : r }))}>

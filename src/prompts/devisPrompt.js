@@ -50,24 +50,111 @@ DESTINATIONS LONG-COURRIER :
 - Maroc               : Vols 90-300€/pers (vol direct 3h30, Royal Air Maroc/Transavia)
                         Riad 3★ 50-100€/nuit · 4★ 100-220€/nuit · 5★ 250-800€/nuit
 
+- Sri Lanka           : Vols 550-850€/pers (escale Dubaï/Doha/Abu Dhabi 12-16h)
+                        Hôtel 3★ 45-90€/nuit · 4★ 90-200€/nuit
+                        Compagnies : Emirates, Qatar Airways, SriLankan Airlines
+                        Saison : déc-mars côte ouest · juil-sept côte est
+
+- Mexique             : Vols 580-950€/pers (escale Madrid/Amsterdam ou direct Cancún)
+                        Hôtel 3★ 60-110€/nuit · 4★ 110-250€/nuit · 5★ 250-600€/nuit
+                        Compagnies : Air France, KLM, Iberia, Aeromexico
+                        Saison sèche : nov-avril (idéal déc-fév)
+
+- Cuba                : Vols 450-750€/pers (direct CDG-HAV ou escale Madrid 10-12h)
+                        Hôtel 3★ 55-100€/nuit · 4★ 100-200€/nuit
+                        Compagnies : Air France, Iberia, Air Europa
+                        Saison : nov-avril (éviter sept-oct cyclones)
+
+- Réunion             : Vols 450-750€/pers (direct CDG-RUN 10h30, Air Austral/Air France)
+                        Hôtel 3★ 80-140€/nuit · 4★ 140-280€/nuit
+                        Location voiture indispensable : 35-60€/jour
+
+- Maurice             : Vols 550-850€/pers (direct CDG-MRU 11h, Air Mauritius/Air France)
+                        Hôtel 3★ 100-180€/nuit · 4★ 180-400€/nuit · 5★ 400-900€/nuit
+                        Saison idéale : mai-déc (éviter jan-mars cyclones)
+
+- Tanzanie/Zanzibar   : Vols 550-900€/pers (escale Nairobi/Addis-Abeba/Doha)
+                        Lodge safari 3★ 120-250€/nuit · 4★ 250-500€/nuit
+                        Safari 3j/2n Serengeti : 600-1200€/pers (parc + lodge inclus)
+                        Compagnies : Ethiopian Airlines, Kenya Airways, Qatar Airways
+
+- Pérou               : Vols 680-1050€/pers (escale Bogotá/Lima/Miami 14-18h)
+                        Hôtel 3★ 50-90€/nuit · 4★ 90-200€/nuit
+                        Train Cusco-Machu Picchu : 80-180€/pers A/R (Inca Rail/PeruRail)
+                        Compagnies : Air France, Iberia, LATAM, Copa Airlines
+
+- Australie           : Vols 950-1500€/pers (escale Singapour/Dubaï/Doha 22-28h)
+                        Hôtel 3★ 100-180€/nuit · 4★ 180-350€/nuit
+                        Compagnies : Singapore Airlines, Emirates, Qatar Airways, Qantas
+                        Location voiture indispensable pour road trips
+
+- États-Unis (Ouest)  : Vols 480-850€/pers (direct LAX/SFO 11h ou escale)
+                        Hôtel 3★ 120-200€/nuit · 4★ 200-380€/nuit
+                        Location voiture : 50-100€/jour (indispensable hors NYC)
+                        Compagnies : Air France, United, Delta, American Airlines
+
 DESTINATIONS MOYEN-COURRIER :
 - Grèce (îles)        : Vols 130-380€/pers (direct 3-4h, easyJet/Aegean/Ryanair)
                         Hôtel 3★ 60-110€/nuit · 4★ 110-230€/nuit
                         Ferry inter-îles 30-80€/pers
 
-- New York (USA)      : Vols 450-780€/pers (direct 8h ou escale)
-                        Hôtel 3★ Manhattan 180-280€/nuit · 4★ 280-450€/nuit
+- Écosse              : Vols 80-250€/pers (direct CDG-EDI/GLA 2h, easyJet/British Airways/Ryanair)
+                        Hôtel 3★ 90-150€/nuit · 4★ 150-280€/nuit
+                        Location SUV/4x4 recommandée : 50-100€/jour
+                        Whisky distillery tour : 15-35€/pers · Château Édimbourg : 18€/pers
+
+- Irlande             : Vols 70-220€/pers (direct CDG-DUB 2h, Ryanair/Aer Lingus/Air France)
+                        Hôtel 3★ 80-140€/nuit · 4★ 140-260€/nuit
+                        Location voiture : 40-80€/jour (conduite à gauche)
+                        Saison idéale : mai-sept
+
+- Angleterre          : Vols 60-200€/pers (direct CDG/ORY-LHR/LGW/STN 1h30, nombreuses compagnies)
+                        Hôtel 3★ Londres 100-180€/nuit · 4★ 180-380€/nuit
+                        Hors Londres (Cotswolds, Bath) : 80-140€/nuit 3★
+
+- Espagne             : Vols 50-180€/pers (direct 2h, Vueling/Iberia/easyJet/Ryanair)
+                        Hôtel 3★ 70-130€/nuit · 4★ 130-280€/nuit
+                        Îles Canaries (Ténérife/Gran Canaria) : vols 80-200€, hôtel 3★ 60-110€/nuit
+
+- Italie              : Vols 60-200€/pers (direct 2h, Ryanair/easyJet/Air France/ITA Airways)
+                        Hôtel 3★ 80-150€/nuit · 4★ 150-320€/nuit
+                        Rome/Florence/Venice : hôtels 10-20% plus chers en haute saison
 
 - Portugal            : Vols 60-200€/pers (direct 2h30, TAP/easyJet/Transavia)
                         Hôtel 3★ 70-120€/nuit · 4★ 120-250€/nuit
+                        Açores : vols 150-280€ · Madère : vols 100-220€
+
+- Croatie             : Vols 90-250€/pers (direct 2h30, easyJet/Ryanair/Croatia Airlines)
+                        Hôtel 3★ 70-130€/nuit · 4★ 130-260€/nuit
+                        Location de bateau (journée) : 200-500€ · Saison : juin-sept
+
+- Turquie             : Vols 120-300€/pers (direct CDG-IST 3h30, Turkish Airlines/Air France)
+                        Hôtel 3★ Istanbul 60-120€/nuit · 4★ 120-250€/nuit
+                        Cappadoce (montgolfière) : 150-250€/pers
+
+- Jordanie            : Vols 200-400€/pers (direct CDG-AMM 4h30, Royal Jordanian/Air France)
+                        Hôtel 3★ 55-100€/nuit · 4★ 100-200€/nuit
+                        Petra (entrée) : 70€/pers · Wadi Rum (camp) : 80-150€/nuit
+
+- Égypte              : Vols 200-420€/pers (direct CDG-CAI 4h45, Air France/EgyptAir)
+                        Hôtel 3★ Le Caire 40-80€/nuit · 4★ 80-160€/nuit
+                        Croisière Nil 7 nuits : 350-800€/pers tout compris
+
+- New York (USA)      : Vols 450-780€/pers (direct 8h ou escale)
+                        Hôtel 3★ Manhattan 180-280€/nuit · 4★ 280-450€/nuit
 
 ASSURANCE VOYAGE :
 - Individuel 1-2 sem  : 30-60€/pers (assistance + rapatriement + annulation)
 - Famille 2 adultes   : 60-110€ pour le groupe
+- Long courrier +3 sem : 50-90€/pers
 
 TRANSFERTS :
 - Transfert aéroport privé (aller ou retour) : 25-80€ selon destination
-- Chauffeur/guide journée privée : 60-150€ selon destination`;
+- Chauffeur/guide journée privée : 60-150€ selon destination
+
+LOCATION VÉHICULE :
+- Europe (citadine/compacte) : 30-60€/jour · SUV : 55-100€/jour
+- Hors Europe (SUV/4x4)      : 50-120€/jour (assurance comprise recommandée)`;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SYSTEM PROMPT
@@ -104,12 +191,29 @@ TYPE D'EXPÉRIENCE (crucial pour orienter le devis) :
 - "Gastronomie" → restaurants repérés à l'avance, marché local, cours de cuisine, vins régionaux
 - "Luxe & bien-être" → hôtel 5★, spa, transferts privés, restaurants étoilés, conciergerie
 
-HÉBERGEMENTS (noms réalistes par destination) :
+HÉBERGEMENTS — RÈGLES DE CALCUL (OBLIGATOIRES) :
+1. PRIX PAR CHAMBRE, PAS PAR PERSONNE : tous les prix du référentiel marché sont par chambre/nuit pour 2 personnes en occupation double. Ne jamais multiplier par le nombre de voyageurs pour solo ou couple.
+   - Solo (1 pers.)    : prix chambre × nuits (supplément single +20-40% si applicable)
+   - Couple (2 pers.)  : prix chambre × nuits (1 seule chambre)
+   - Famille (3-4 p.)  : 1 chambre familiale (+20-30% vs standard) OU 2 chambres standard
+   - Groupe (5+ p.)    : nombre de chambres = ceil(voyageurs / 2)
+2. QUANTITÉ = nombre de nuits (pas de jours). Un séjour 10 jours = 9 nuits.
+3. FORMULE : ajouter au prix de base par chambre/nuit :
+   - Petit-déjeuner   : +8 à +20€/chambre/nuit selon standing
+   - Demi-pension     : +25 à +50€/chambre/nuit selon standing
+   - Pension complète : +45 à +80€/chambre/nuit selon standing
+   - Tout compris     : prix all-inclusive = inclus dans le tarif de base (ne pas additionner)
+4. COHÉRENCE : le montant hébergement doit être égal à prix_unitaire × quantite. Vérifier ce calcul avant de sortir le JSON.
+
+HÉBERGEMENTS — NOMS RÉALISTES PAR DESTINATION :
 - Bali : The Layar (5★ Seminyak), Komaneka at Bisma (4★ Ubud), Alaya Resort Ubud (4★), W Bali (5★), Ibis Styles Legian (3★), COMO Uma Ubud (5★)
 - Thaïlande : Anantara Riverside (5★ Bangkok), Centara Grand (4★), Samui Paradise (4★), ibis Styles (3★)
 - Japon : Park Hyatt Tokyo (5★), Andaz Tokyo (5★), Dormy Inn (3★ chaîne fiable), Cross Hotel (3★)
 - Islande : ION Adventure Hotel (4★), Hotel Borg Reykjavik (4★), Centerhotel Arnarhvoll (4★)
 - Maroc : La Mamounia Marrakech (5★), Riad Farnatchi (4★), Riad Yasmine (3★)
+- Écosse : The Balmoral Edinburgh (5★), Malmaison Edinburgh (4★), ibis Edinburgh Centre (3★), Gleneagles (5★ Perthshire)
+- Portugal : Bairro Alto Hotel Lisbonne (5★), Memmo Alfama (4★), ibis Lisboa (3★), Reid's Palace Madère (5★)
+- Italie : Hotel de Russie Rome (5★), J.K. Place Florence (5★), Gritti Palace Venise (5★), ibis Roma (3★)
 
 CONSEILS D'INITIÉ (chaque devis doit en avoir 2-3 utiles et concrets) :
 - Meilleure période et pourquoi

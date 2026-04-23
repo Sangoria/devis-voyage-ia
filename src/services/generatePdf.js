@@ -160,11 +160,12 @@ export async function generatePdf(devis, formData = {}, profile = {}) {
   const today = longDate(new Date().toISOString().split("T")[0]);
 
   let duree = "";
-  if (dateDebut && dateFin) {
-    const d = Math.round((new Date(dateFin) - new Date(dateDebut)) / 86400000);
-    if (d > 0) duree = `${d} nuit${d > 1 ? "s" : ""}`;
-  } else if (itineraire.length > 0) {
-    duree = `${itineraire.length} jour${itineraire.length > 1 ? "s" : ""}`;
+  if (itineraire.length > 0) {
+    const n = itineraire.length;
+    duree = `${n} jour${n > 1 ? "s" : ""}${n > 1 ? ` / ${n - 1} nuit${n - 1 > 1 ? "s" : ""}` : ""}`;
+  } else if (dateDebut && dateFin) {
+    const d = Math.round((parseFrDate(dateFin) - parseFrDate(dateDebut)) / 86400000);
+    if (d > 0) duree = `${d + 1} jour${d + 1 > 1 ? "s" : ""} / ${d} nuit${d > 1 ? "s" : ""}`;
   }
 
   // ── EN-TÊTE PAGE 1 ──────────────────────────────────────────────────
@@ -242,13 +243,22 @@ export async function generatePdf(devis, formData = {}, profile = {}) {
   const resumeAllLines = resume ? doc.splitTextToSize(sanitize(resume), CW - 20) : [];
   const resumeLines = resumeAllLines.slice(0, 2); // max 2 lignes pour tenir sur page 1
 
-  const metaItems = [
+  const metaOthers = [
     destination && `Destination : ${destination}`,
     duree       && `Duree       : ${duree}`,
     voyageurs   && `Voyageurs   : ${typeGroupe ? typeGroupe + "  -  " : ""}${voyageurs} pers.`,
-    dateDebut   && `Depart      : ${shortDate(dateDebut)}`,
-    dateFin     && `Retour      : ${shortDate(dateFin)}`,
   ].filter(Boolean);
+
+  // Départ/Retour toujours empilés dans la colonne droite (col 1)
+  const metaItems = [...metaOthers];
+  if (dateDebut || dateFin) {
+    if (metaItems.length % 2 === 0) metaItems.push(null); // aligne sur col 1
+    metaItems.push(dateDebut ? `Depart      : ${shortDate(dateDebut)}` : null);
+    if (dateFin) {
+      metaItems.push(null); // placeholder col 0
+      metaItems.push(`Retour      : ${shortDate(dateFin)}`);
+    }
+  }
 
   const expLine = typesExperience.length > 0 ? typesExperience.join("  ·  ") : "";
 
@@ -274,6 +284,7 @@ export async function generatePdf(devis, formData = {}, profile = {}) {
     doc.setFontSize(8);
     doc.setTextColor(...OCEAN);
     metaItems.forEach((item, idx) => {
+      if (!item) return;
       const col = idx % 2;
       const row = Math.floor(idx / 2);
       doc.text(item, bx + col * (CW / 2 - 5), by + row * 5.5);
@@ -358,7 +369,7 @@ export async function generatePdf(devis, formData = {}, profile = {}) {
 
     autoTable(doc, {
       startY: y,
-      head: [["Poste", "Detail", "Qte x P.U.", "Montant"]],
+      head: [["Prestation", "Description", "Qté × Prix unit.", "Montant TTC"]],
       body: tableRows,
       foot: [[
         { content: "TOTAL TTC", styles: { fontStyle: "bold", textColor: OCEAN, fontSize: 10 } },

@@ -164,7 +164,7 @@ export default function Accueil() {
       <section className="landing-pain">
         <div className="landing-inner">
           <h2 className="landing-pain-title">
-            Vous passez 2h sur 10 onglets pour un devis qui ne signera peut-être jamais.
+            Vous passez 2h sur 10 onglets pour un devis qui ne sera peut-être jamais validé ?
           </h2>
           <div className="pain-cards">
             {[
