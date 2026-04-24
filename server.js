@@ -160,6 +160,50 @@ app.post("/api/generate-quote", async (req, res) => {
   }
 });
 
+// ── POST /api/notify-feedback ────────────────────────────────────────────
+app.post("/api/notify-feedback", async (req, res) => {
+  const { rating, comment, source } = req.body ?? {};
+  if (!rating) return res.status(400).json({ error: "rating manquant" });
+
+  const RATING_LABELS = {
+    parfait        : "😍 Parfait",
+    a_ameliorer    : "🤔 À améliorer",
+    pas_utilisable : "😞 Pas utilisable",
+  };
+
+  try {
+    const nodemailer  = require("nodemailer");
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "contact.qovee@gmail.com",
+        pass: process.env.GMAIL_APP_PASSWORD,
+      },
+    });
+
+    const label  = RATING_LABELS[rating] ?? rating;
+    const origin = source === "banner" ? "Bouton bannière bêta" : "Post-génération de devis";
+
+    await transporter.sendMail({
+      from   : '"Qovee Feedback" <contact.qovee@gmail.com>',
+      to     : "contact.qovee@gmail.com",
+      subject: `[Feedback Qovee] ${label}`,
+      text   : [
+        `Nouveau feedback reçu sur Qovee`,
+        ``,
+        `Note        : ${label}`,
+        `Source      : ${origin}`,
+        `Commentaire : ${comment || "(aucun)"}`,
+      ].join("\n"),
+    });
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("[notify-feedback]", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ── POST /api/create-checkout-session ────────────────────────────────────
 const PRICE_IDS = {
   solo   : process.env.STRIPE_PRICE_SOLO,
