@@ -1,11 +1,9 @@
 import { Link } from "react-router-dom";
-import Nav from "../components/Nav";
 import "../App.css";
 
 export default function NotFound() {
   return (
     <div className="app">
-      <Nav />
       <main style={{
         display        : "flex",
         flexDirection  : "column",

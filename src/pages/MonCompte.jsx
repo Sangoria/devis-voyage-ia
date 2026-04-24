@@ -1,5 +1,4 @@
 import { useState, useRef } from "react";
-import Nav from "../components/Nav";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase, uploadAvatar, uploadLogo } from "../lib/supabase";
 
@@ -113,7 +112,6 @@ export default function MonCompte() {
 
   return (
     <div className="app" style={{ minHeight: "100vh" }}>
-      <Nav />
       <main className="compte-main">
         <div className="compte-header">
           <h1 className="compte-title">Mon compte</h1>

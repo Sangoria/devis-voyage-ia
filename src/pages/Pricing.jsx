@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -18,7 +17,7 @@ const PLANS = [
       { text: "Branding agence sur PDF", included: false },
       { text: "Multi-utilisateurs",               included: false },
       { text: "Tableau de bord & suivi clients",  included: false },
-      { text: "Support humain",                   included: true  },
+      { text: "Support limité",                   included: true  },
     ],
   },
   {
@@ -108,7 +107,6 @@ export default function Pricing() {
 
   return (
     <div className="app" style={{ minHeight: "100vh" }}>
-      <Nav />
 
       <main className="pricing-main">
 

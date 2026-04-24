@@ -60,6 +60,9 @@
   --font-sans:  'Syne', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-serif: 'Cormorant Garamond', Georgia, serif;
   --font-mono:  'DM Mono', 'Courier New', monospace;
+
+  /* ── Hauteur bannière bêta ── */
+  --beta-h: 2.35rem;
 }
 
 body {
@@ -72,8 +75,6 @@ body {
 
 /* ── Nav ─────────────────────────────────────────────────────────────── */
 .nav {
-  position: sticky;
-  top: 0;
   z-index: 50;
   background: #FAF7F2;
   border-bottom: 1px solid rgba(26,48,64,0.08);
@@ -88,7 +89,7 @@ body {
 .nav-inner {
   width: 100%;
   padding: 0 2rem;
-  height: 96px;
+  height: 106px;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
@@ -107,7 +108,7 @@ body {
 }
 .nav-name  {
   font-family: var(--font-sans);
-  font-size: 4.62rem;
+  font-size: 5.09rem;
   font-weight: 700;
   color: var(--ocean);
   letter-spacing: -0.03em;
@@ -115,7 +116,7 @@ body {
 }
 .nav-name-q {
   position: relative;
-  font-size: 5.31rem;
+  font-size: 5.86rem;
   color: var(--terra);
 }
 .nav-name-q::after {
@@ -1748,6 +1749,30 @@ input[type="date"] { padding-left: 2.5rem; }
 }
 .auth-field input::placeholder { color: var(--faint); }
 
+.auth-pw-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.auth-pw-wrap input {
+  flex: 1;
+  padding-right: 2.75rem;
+}
+.auth-pw-toggle {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+.auth-pw-toggle:hover { color: var(--terra); }
+.auth-pw-toggle svg { width: 18px; height: 18px; }
+
 .auth-btn {
   height: 48px;
   display: flex;
@@ -2139,6 +2164,13 @@ input[type="date"] { padding-left: 2.5rem; }
 .card-action-delete     { background: #FFF5F5; border-color: #FECACA; color: #E57373; margin-left: auto; }
 .card-action-delete:hover { background: #FEE2E2; border-color: #FCA5A5; color: #DC2626; }
 
+/* ── Wrapper header global ─────────────────────────────────────────────────── */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+
 /* ── Bannière bêta ─────────────────────────────────────────────────────────── */
 .beta-banner {
   display: flex;
@@ -2148,15 +2180,12 @@ input[type="date"] { padding-left: 2.5rem; }
   background: var(--cream);
   color: var(--ocean);
   border-bottom: 1px solid var(--border);
-  font-size: 0.8rem;
-  position: sticky;
-  top: 0;
-  z-index: 200;
+  font-size: 0.88rem;
 }
 .beta-badge {
   background: var(--gold);
   color: var(--ocean);
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   padding: 0.15em 0.5em;
@@ -2169,7 +2198,8 @@ input[type="date"] { padding-left: 2.5rem; }
   color: var(--ocean);
   border-radius: 6px;
   padding: 0.3rem 0.75rem;
-  font-size: 0.78rem;
+  font-size: 0.86rem;
+  font-family: var(--font-sans);
   cursor: pointer;
   transition: background 0.15s;
 }

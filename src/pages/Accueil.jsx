@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 import { useAuth } from "../contexts/AuthContext";
 import "../App.css";
@@ -131,7 +130,6 @@ export default function Accueil() {
 
   return (
     <div className="app">
-      <Nav />
 
       {/* ── Hero ── */}
       <section className="hero">
@@ -225,7 +223,7 @@ export default function Accueil() {
                   { text: "Branding agence sur PDF",          included: false },
                   { text: "Multi-utilisateurs",               included: false },
                   { text: "Tableau de bord & suivi clients",  included: false },
-                  { text: "Support humain",                   included: true  },
+                  { text: "Support limité",                   included: true  },
                 ],
               },
               {

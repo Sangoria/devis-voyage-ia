@@ -1,10 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { saveFeedback } from "../lib/supabase";
 
 export default function BetaBanner() {
   const { user } = useAuth();
+  const bannerRef = useRef(null);
   const [open,    setOpen]    = useState(false);
+
+  useEffect(() => {
+    const updateHeight = () => {
+      if (bannerRef.current) {
+        document.documentElement.style.setProperty(
+          "--beta-h",
+          `${bannerRef.current.offsetHeight}px`
+        );
+      }
+    };
+    updateHeight();
+    const ro = new ResizeObserver(updateHeight);
+    if (bannerRef.current) ro.observe(bannerRef.current);
+    return () => ro.disconnect();
+  }, []);
   const [rating,  setRating]  = useState(null);
   const [comment, setComment] = useState("");
   const [sent,    setSent]    = useState(false);
@@ -26,7 +42,7 @@ export default function BetaBanner() {
 
   return (
     <>
-      <div className="beta-banner">
+      <div className="beta-banner" ref={bannerRef}>
         <span className="beta-badge">BÊTA</span>
         <span className="beta-text">Version bêta — Vos retours comptent !</span>
         <button className="beta-feedback-btn" onClick={() => setOpen(true)}>

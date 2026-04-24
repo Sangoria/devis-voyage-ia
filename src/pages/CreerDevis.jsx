@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import Nav from "../components/Nav";
 import DevisResult from "../components/DevisResult";
 import { generateDevis } from "../services/claude";
 import { generatePdf  } from "../services/generatePdf";
@@ -132,7 +131,6 @@ export default function CreerDevis() {
 
   return (
     <div className="app">
-      <Nav />
 
       <main className="main" style={{ paddingTop: "3rem" }}>
 

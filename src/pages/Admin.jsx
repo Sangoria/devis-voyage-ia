@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { fetchAdminStats } from "../lib/supabase";
-import Nav from "../components/Nav";
 
 const ADMIN_EMAIL = "clem.let10@gmail.com";
 
@@ -33,7 +32,6 @@ export default function Admin() {
   if (loading || fetching) {
     return (
       <div className="app">
-        <Nav />
         <main className="main" style={{ paddingTop: "3rem", textAlign: "center", color: "var(--muted)" }}>
           Chargement…
         </main>

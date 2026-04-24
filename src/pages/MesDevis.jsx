@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import Nav from "../components/Nav";
 import DevisResult from "../components/DevisResult";
 import { generatePdf   } from "../services/generatePdf";
 import { fetchDevis, updateDevisStatus, supabase } from "../lib/supabase";
@@ -295,7 +294,6 @@ export default function MesDevis() {
 
   return (
     <div className="app" style={{ minHeight: "100vh" }}>
-      <Nav />
 
       <main className="mes-devis-main">
 

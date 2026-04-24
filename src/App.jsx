@@ -3,6 +3,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider }   from "./contexts/AuthContext";
 import ProtectedRoute     from "./components/ProtectedRoute";
 import BetaBanner         from "./components/BetaBanner";
+import Nav               from "./components/Nav";
 import Accueil            from "./pages/Accueil";
 import CreerDevis         from "./pages/CreerDevis";
 import Login              from "./pages/Login";
@@ -23,7 +24,10 @@ export default function App() {
     <HelmetProvider>
       <AuthProvider>
         <BrowserRouter>
-          <BetaBanner />
+          <div className="site-header">
+            <BetaBanner />
+            <Nav />
+          </div>
           <Routes>
             {/* Pages publiques */}
             <Route path="/"        element={<Accueil />} />
