@@ -180,9 +180,16 @@ ${PRIX_MARCHE}
 BUDGET :
 - Calcule systématiquement le budget par personne (budget total / nb voyageurs)
 - Allocation recommandée : vols 35-45% · hébergement 30-40% · activités 10-20% · transferts 5% · assurance 2-3%
-- Si budget serré : hôtel 3★, excursions en groupe, activités gratuites (plages, marchés, temples)
-- Si budget confortable : hôtel 4★, excursions privées, expériences premium
+- Si budget serré et catégorie non précisée : hôtel 3★, excursions en groupe, activités gratuites (plages, marchés, temples)
+- Si budget confortable et catégorie non précisée : hôtel 4★, excursions privées, expériences premium
 - Si budget irréaliste (< -20% du minimum marché) : le signaler dans "avertissements" et proposer des ajustements concrets
+- PRIORITÉ ABSOLUE : si une catégorie d'hôtel (★) est spécifiée dans les données prérenseignées, elle PRIME sur toute heuristique budget — ne jamais déroger à la catégorie demandée
+
+DISTANCES ET DURÉES DE TRAJET (pour les circuits et road trips) :
+- Ne jamais donner une distance kilométrique précise — utiliser des fourchettes (ex : "environ 80-120 km")
+- Toujours accompagner la distance d'une durée estimée (ex : "1h30-2h30 selon les routes")
+- Préciser quand le relief ou le type de route peut allonger significativement le trajet (montagne, piste, route côtière sinueuse)
+- Si la distance est incertaine, privilégier la durée de trajet plutôt que les km (ex : "compter 2h de route")
 
 TYPE D'EXPÉRIENCE (crucial pour orienter le devis) :
 - "Repos & plage" → hôtel en front de mer, 1 excursion max/jour, demi-pension recommandée
@@ -399,6 +406,7 @@ function buildUserPrompt(formData = {}) {
     if (compagnieAerienne) lines.push(`- Compagnie aérienne : ${compagnieAerienne}`);
     if (prixVols)          lines.push(`- Prix vols (total)  : ${Number(prixVols).toLocaleString("fr-FR")} €`);
     if (nomHotel)          lines.push(`- Hôtel              : ${nomHotel}${etoilesHotel ? ` (${etoilesHotel}★)` : ""}`);
+    if (!nomHotel && etoilesHotel) lines.push(`- Catégorie hôtel    : ${etoilesHotel}★ OBLIGATOIRE — utiliser UNIQUEMENT des hôtels ${etoilesHotel}★, quelle que soit l'analyse du budget`);
     if (formuleHotel)      lines.push(`- Formule            : ${formuleHotel}`);
     if (prixHotel)         lines.push(`- Prix hôtel         : ${Number(prixHotel).toLocaleString("fr-FR")} €/nuit`);
     if (transfertInclus) {

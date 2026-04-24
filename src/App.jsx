@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider }   from "./contexts/AuthContext";
 import ProtectedRoute     from "./components/ProtectedRoute";
+import BetaBanner         from "./components/BetaBanner";
 import Accueil            from "./pages/Accueil";
 import CreerDevis         from "./pages/CreerDevis";
 import Login              from "./pages/Login";
@@ -9,6 +10,7 @@ import Signup             from "./pages/Signup";
 import MesDevis           from "./pages/MesDevis";
 import MonCompte          from "./pages/MonCompte";
 import Pricing            from "./pages/Pricing";
+import Admin              from "./pages/Admin";
 import MentionsLegales    from "./pages/legal/MentionsLegales";
 import Confidentialite    from "./pages/legal/Confidentialite";
 import Cookies            from "./pages/legal/Cookies";
@@ -21,6 +23,7 @@ export default function App() {
     <HelmetProvider>
       <AuthProvider>
         <BrowserRouter>
+          <BetaBanner />
           <Routes>
             {/* Pages publiques */}
             <Route path="/"        element={<Accueil />} />
@@ -45,6 +48,9 @@ export default function App() {
             <Route path="/mon-compte" element={
               <ProtectedRoute><MonCompte /></ProtectedRoute>
             }/>
+
+            {/* Admin */}
+            <Route path="/admin" element={<Admin />} />
 
             {/* 404 */}
             <Route path="*" element={<NotFound />} />

@@ -33,6 +33,9 @@ export default function Login() {
     <div className="auth-page">
       <div className="auth-card">
 
+        {/* Retour accueil */}
+        <Link to="/" className="auth-back">← Accueil</Link>
+
         {/* Logo */}
         <div className="auth-logo">
           <span style={{

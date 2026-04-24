@@ -128,3 +128,30 @@ export async function countDevis(userId) {
     .eq("user_id", userId);
   return { count: count ?? 0, error };
 }
+
+/** Sauvegarde un feedback bêta. */
+export async function saveFeedback({ userId, devisId, rating, comment }) {
+  return supabase.from("feedback").insert({
+    user_id   : userId  ?? null,
+    devis_id  : devisId ?? null,
+    rating,
+    comment   : comment || null,
+  });
+}
+
+/** Charge les stats admin : total devis, total users, derniers feedbacks. */
+export async function fetchAdminStats() {
+  const [devisRes, usersRes, feedbackRes] = await Promise.all([
+    supabase.from("devis").select("*", { count: "exact", head: true }),
+    supabase.from("profiles").select("*", { count: "exact", head: true }),
+    supabase.from("feedback")
+      .select("id, rating, comment, created_at, user_id")
+      .order("created_at", { ascending: false })
+      .limit(50),
+  ]);
+  return {
+    devisCount : devisRes.count  ?? 0,
+    usersCount : usersRes.count  ?? 0,
+    feedbacks  : feedbackRes.data ?? [],
+  };
+}

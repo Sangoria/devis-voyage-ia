@@ -79,7 +79,12 @@ export default function CreerDevis() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (user && !hasQuota) {
+    if (!user) {
+      navigate("/signup");
+      return;
+    }
+
+    if (!hasQuota) {
       navigate("/pricing");
       return;
     }
@@ -572,27 +577,22 @@ export default function CreerDevis() {
           <div className="form-cta">
             <button
               type="submit"
-              disabled={loading || (user && !hasQuota)}
+              disabled={loading}
               className="cta-btn"
             >
               {loading ? (
                 <><span className="cta-spinner"/>Génération en cours…</>
-              ) : (user && !hasQuota) ? (
-                "Quota atteint · Passer Pro →"
+              ) : !user ? (
+                "Créer un compte pour continuer →"
+              ) : !hasQuota ? (
+                "Démarrer l'essai gratuit 7 jours →"
               ) : "Générer le devis →"}
             </button>
 
             {user && !isSubscribed && (
-              <div className={`quota-bar${devisCount >= FREE_QUOTA ? " quota-full" : ""}`}>
-                <span className="quota-count">{devisCount}/{FREE_QUOTA}</span>
-                {devisCount >= FREE_QUOTA ? (
-                  <>
-                    Devis gratuits épuisés,{" "}
-                    <a href="/pricing" className="quota-link">Passer à l'abonnement Pro</a>
-                  </>
-                ) : (
-                  `devis gratuit${devisCount > 1 ? "s" : ""} utilisé${devisCount > 1 ? "s" : ""}`
-                )}
+              <div className="quota-bar">
+                Essai gratuit 7 jours, sans engagement.{" "}
+                <a href="/pricing" className="quota-link">Voir les forfaits →</a>
               </div>
             )}
           </div>

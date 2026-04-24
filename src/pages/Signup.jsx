@@ -68,6 +68,9 @@ export default function Signup() {
     <div className="auth-page">
       <div className="auth-card">
 
+        {/* Retour accueil */}
+        <Link to="/" className="auth-back">← Accueil</Link>
+
         {/* Logo */}
         <div className="auth-logo">
           <img src="/favicon.png" width="72" height="72" alt="Qovee" />

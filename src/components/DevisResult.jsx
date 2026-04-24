@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { updateDevisContent } from "../lib/supabase";
 import { normalizeDevis } from "../lib/normalizeDevis";
+import DevisFeedback from "./DevisFeedback";
 
 function formatDate(dateStr) {
   if (!dateStr) return null;
@@ -60,7 +61,7 @@ function CostRow({ ligne }) {
 }
 
 // ── Mode lecture ──────────────────────────────────────────────────────────────
-function ReadView({ normalized, onEdit, onRegenerate, onPdf, onReset }) {
+function ReadView({ normalized, onEdit, onRegenerate, onPdf, onReset, savedDevisId }) {
   const { titre, resume, itineraire, lignes, total_ttc, conseilsPratiques, avertissements } = normalized;
 
   return (
@@ -165,6 +166,8 @@ function ReadView({ normalized, onEdit, onRegenerate, onPdf, onReset }) {
           </ul>
         </div>
       )}
+
+      <DevisFeedback devisId={savedDevisId} />
 
       <div className="dr-actions">
         <button className="dr-btn dr-btn-primary" onClick={onPdf}><PdfIcon />Télécharger le PDF</button>
@@ -381,6 +384,7 @@ export default function DevisResult({ devis, onReset, onRegenerate, onPdf, onSav
   return (
     <ReadView
       normalized={normalized}
+      savedDevisId={savedDevisId}
       onEdit={() => setEditMode(true)}
       onRegenerate={onRegenerate}
       onPdf={() => onPdf(raw)}

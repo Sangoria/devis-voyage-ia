@@ -1769,6 +1769,16 @@ input[type="date"] { padding-left: 2.5rem; }
 .auth-btn:hover:not(:disabled) { background: var(--terra-d); transform: translateY(-1px); }
 .auth-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
+.auth-back {
+  display: block;
+  text-align: left;
+  margin-bottom: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-decoration: none;
+}
+.auth-back:hover { color: var(--ocean); }
+
 .auth-switch {
   text-align: center;
   margin-top: 1.25rem;
@@ -2126,8 +2136,187 @@ input[type="date"] { padding-left: 2.5rem; }
 .card-action-refuse     { background: #FEF2F2; border-color: #FECACA; color: #DC2626; }
 .card-action-duplicate  { background: var(--cream); border-color: var(--border-2); color: var(--ocean); }
 .card-action-pdf        { background: var(--terra-l); border-color: rgba(196,113,74,.3); color: var(--terra-d); }
-.card-action-delete     { background: white; border-color: var(--border); color: var(--faint); margin-left: auto; }
-.card-action-delete:hover { border-color: #FECACA; color: #DC2626; }
+.card-action-delete     { background: #FFF5F5; border-color: #FECACA; color: #E57373; margin-left: auto; }
+.card-action-delete:hover { background: #FEE2E2; border-color: #FCA5A5; color: #DC2626; }
+
+/* ── Bannière bêta ─────────────────────────────────────────────────────────── */
+.beta-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 1.25rem;
+  background: var(--cream);
+  color: var(--ocean);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8rem;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+.beta-badge {
+  background: var(--gold);
+  color: var(--ocean);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 0.15em 0.5em;
+  border-radius: 4px;
+}
+.beta-text { flex: 1; opacity: 0.9; }
+.beta-feedback-btn {
+  background: var(--cream);
+  border: 1px solid var(--border-2);
+  color: var(--ocean);
+  border-radius: 6px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.beta-feedback-btn:hover { background: var(--border); }
+
+/* ── Modal feedback (bannière) ─────────────────────────────────────────────── */
+.fb-overlay {
+  position: fixed; inset: 0;
+  background: rgba(26,48,64,0.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 500;
+}
+.fb-modal {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(26,48,64,0.18);
+}
+.fb-close {
+  position: absolute; top: 1rem; right: 1rem;
+  background: none; border: none; font-size: 1.4rem;
+  color: var(--muted); cursor: pointer; line-height: 1;
+}
+.fb-close:hover { color: var(--ocean); }
+.fb-title { font-size: 1.1rem; font-weight: 700; color: var(--ocean); margin: 0 0 0.3rem; }
+.fb-sub   { font-size: 0.85rem; color: var(--muted); margin: 0 0 1.25rem; }
+.fb-ratings { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+.fb-rating-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+  padding: 0.65rem 0.5rem; border-radius: 10px;
+  border: 1.5px solid var(--border); background: var(--cream);
+  font-size: 0.78rem; color: var(--ocean); cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.fb-rating-btn.active { border-color: var(--terra); background: var(--terra-l); }
+.fb-emoji { font-size: 1.5rem; }
+.fb-comment {
+  width: 100%; box-sizing: border-box;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  padding: 0.6rem 0.75rem; font-size: 0.85rem; color: var(--ocean);
+  resize: none; font-family: inherit; margin-bottom: 1rem;
+}
+.fb-comment:focus { outline: none; border-color: var(--terra); }
+.fb-submit {
+  width: 100%; padding: 0.7rem; border-radius: 8px;
+  background: var(--terra); color: white; border: none;
+  font-size: 0.9rem; font-weight: 600; cursor: pointer;
+  transition: opacity 0.15s;
+}
+.fb-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+.fb-sent { text-align: center; padding: 1.5rem 0; color: var(--ocean); }
+.fb-sent-icon { display: block; font-size: 2rem; margin-bottom: 0.5rem; color: #16A34A; }
+
+/* ── Feedback inline post-devis ────────────────────────────────────────────── */
+.dv-fb {
+  border-top: 1px solid var(--border);
+  padding: 1.25rem 0 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.dv-fb-question {
+  font-size: 0.9rem; font-weight: 600; color: var(--ocean);
+  margin: 0 0 0.75rem;
+}
+.dv-fb-ratings { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.dv-fb-btn {
+  padding: 0.4rem 0.85rem; border-radius: 20px;
+  border: 1.5px solid var(--border); background: var(--cream);
+  font-size: 0.82rem; color: var(--ocean); cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.dv-fb-btn.active { border-color: var(--terra); background: var(--terra-l); }
+.dv-fb-extra { margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.dv-fb-comment {
+  width: 100%; box-sizing: border-box;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  padding: 0.5rem 0.75rem; font-size: 0.83rem; color: var(--ocean);
+  resize: none; font-family: inherit;
+}
+.dv-fb-comment:focus { outline: none; border-color: var(--terra); }
+.dv-fb-submit {
+  align-self: flex-end;
+  padding: 0.45rem 1.1rem; border-radius: 8px;
+  background: var(--terra); color: white; border: none;
+  font-size: 0.83rem; font-weight: 600; cursor: pointer;
+}
+.dv-fb-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+.dv-fb-sent {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.87rem; color: #16A34A; font-weight: 600;
+  border-top: 1px solid var(--border); padding: 1rem 0 0.5rem;
+}
+.dv-fb-sent-icon { font-size: 1rem; }
+
+/* ── Dashboard Admin ───────────────────────────────────────────────────────── */
+.admin-header {
+  display: flex; align-items: center; gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.admin-title { font-size: 1.6rem; font-weight: 700; color: var(--ocean); margin: 0; }
+.admin-badge {
+  background: var(--terra-l); color: var(--terra);
+  border: 1px solid rgba(196,113,74,.3);
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em;
+  padding: 0.2em 0.65em; border-radius: 20px;
+}
+.admin-kpis {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.admin-kpi {
+  background: white; border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1.25rem;
+  text-align: center;
+}
+.admin-kpi-value { display: block; font-size: 2rem; font-weight: 700; color: var(--ocean); }
+.admin-kpi-label { display: block; font-size: 0.8rem; color: var(--muted); margin-top: 0.2rem; }
+.admin-card {
+  background: white; border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+.admin-card-title { font-size: 1rem; font-weight: 700; color: var(--ocean); margin: 0 0 1.25rem; }
+.admin-satisfaction { display: flex; flex-direction: column; gap: 0.75rem; }
+.admin-sat-row { display: flex; align-items: center; gap: 0.75rem; }
+.admin-sat-label { width: 130px; font-size: 0.85rem; color: var(--ocean); flex-shrink: 0; }
+.admin-sat-bar-wrap {
+  flex: 1; height: 8px; background: var(--cream);
+  border-radius: 4px; overflow: hidden;
+}
+.admin-sat-bar { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+.admin-sat-pct { font-size: 0.8rem; color: var(--muted); width: 80px; text-align: right; }
+.admin-fb-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.admin-fb-item {
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 0.85rem 1rem;
+}
+.admin-fb-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem; }
+.admin-fb-rating { font-size: 0.88rem; font-weight: 600; }
+.admin-fb-date   { font-size: 0.75rem; color: var(--muted); }
+.admin-fb-comment { font-size: 0.85rem; color: var(--ocean); margin: 0; font-style: italic; }
+.admin-empty { color: var(--muted); font-size: 0.9rem; }
+@media (max-width: 600px) {
+  .admin-kpis { grid-template-columns: 1fr; }
+}
 
 /* Badges de statut */
 .status-badge {
