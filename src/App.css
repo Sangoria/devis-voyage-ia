@@ -1494,6 +1494,8 @@ input[type="date"] { padding-left: 2.5rem; }
   .nav-logo { width: 28px; height: 28px; }
   .nav-agency { display: none; }
   .nav-btn-pro { display: none; }
+  .nav-left .nav-link { display: none; }
+  .nav-hamburger { display: flex; }
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────── */
@@ -3765,7 +3767,172 @@ input[type="date"] { padding-left: 2.5rem; }
   .why-pillars { grid-template-columns: 1fr; }
   .lp-grid { grid-template-columns: 1fr; }
   .lp-card { width: 100%; padding: 2rem 1.5rem; }
-  .site-footer-inner { flex-direction: column; text-align: center; gap: 1.25rem; }
+  .site-footer-inner { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.5rem; padding: 0 1.5rem; }
+  .site-footer-baseline { text-align: center; }
+  .site-footer-name { font-size: 2.5rem; }
   .hero-title { font-size: clamp(2.25rem, 8vw, 3rem); }
 }
 .quota-link:hover { text-decoration: underline; }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   MOBILE — hamburger nav & extensions
+══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Hamburger (caché sur desktop) ── */
+.nav-hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: 1px solid rgba(26,48,64,0.12);
+  border-radius: 8px;
+  color: var(--ocean);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+.nav-hamburger:hover {
+  border-color: var(--terra);
+  background: rgba(196,113,74,0.06);
+  color: var(--terra);
+}
+
+/* ── Menu mobile déroulant ── */
+.nav-mobile-menu {
+  background: var(--bg);
+  border-bottom: 2px solid var(--border);
+  box-shadow: 0 4px 16px rgba(26,48,64,.10);
+  display: flex;
+  flex-direction: column;
+  padding: 0.375rem 0 0.75rem;
+  animation: slideDown 0.15s ease;
+}
+
+.nav-mobile-link {
+  padding: 0.875rem 1.5rem;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--ocean);
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.nav-mobile-link:hover {
+  background: rgba(196,113,74,0.05);
+  border-left-color: var(--terra);
+  color: var(--terra);
+}
+.nav-mobile-link-active {
+  background: var(--terra-l);
+  border-left-color: var(--terra);
+  color: var(--terra);
+}
+.nav-mobile-link-pro { color: var(--terra); font-weight: 700; }
+
+.nav-mobile-signout {
+  margin: 0.25rem 1.5rem 0;
+  padding: 0.625rem 1rem;
+  background: none;
+  border: 1px solid rgba(26,48,64,0.12);
+  border-radius: 8px;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  color: var(--mist);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s, color 0.2s;
+}
+.nav-mobile-signout:hover { border-color: var(--terra); color: var(--terra); }
+
+/* ── Footer — classes manquantes ── */
+.site-footer-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+.site-footer-email {
+  font-family: var(--font-mono);
+  font-size: 0.828rem;
+  color: var(--mist);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  transition: color 0.2s;
+}
+.site-footer-email:hover { color: var(--terra); }
+.site-footer-sep { color: var(--mist); opacity: 0.6; }
+
+/* ── Mon Compte — responsive ── */
+@media (max-width: 640px) {
+  .compte-layout {
+    grid-template-columns: 1fr;
+  }
+  .compte-sidebar {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .compte-sidebar-btn {
+    flex: 1;
+    justify-content: center;
+    min-width: 120px;
+  }
+  .compte-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .compte-field--span2 { grid-column: span 1; }
+  .compte-main { padding: 1.5rem 1rem 4rem; }
+  .compte-color-row { flex-wrap: wrap; }
+}
+
+/* ── Logo auth (Login) ── */
+.auth-logo-brand {
+  font-family    : var(--font-sans);
+  font-size      : 3.63rem;
+  font-weight    : 700;
+  letter-spacing : -0.02em;
+  line-height    : 1;
+}
+.auth-logo-q {
+  position : relative;
+  color    : var(--terra);
+}
+.auth-logo-q::after {
+  content       : "";
+  position      : absolute;
+  width         : 0.099em;
+  height        : 0.099em;
+  background    : var(--gold);
+  border-radius : 50%;
+  bottom        : 0.24em;
+  right         : 0.400em;
+}
+.auth-logo-rest { color: var(--ocean); }
+
+/* ── Auth card petits écrans ── */
+@media (max-width: 400px) {
+  .auth-card { padding: 1.75rem 1.25rem; }
+  .auth-logo-brand { font-size: 2.75rem; }
+}
+
+/* ── Landing & Hero — très petits écrans ── */
+@media (max-width: 480px) {
+  .landing-pain, .landing-how, .landing-why,
+  .landing-pricing, .landing-faq { padding: 48px 0; }
+  .landing-inner { padding: 0 16px; }
+  .pain-cards { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .pain-card { padding: 1.5rem 1rem; }
+  .lp-card { padding: 1.5rem 1rem; }
+  .hero { padding: 2.5rem 1rem 3.5rem; }
+  .hero-cta { padding: 14px 24px; font-size: 0.95rem; }
+  .hero-features { gap: 0.75rem; }
+  .hero-feature { font-size: 1rem; }
+  .how-title-main { font-size: 1.5rem; padding: 0.5rem 1.5rem; }
+  .fb-modal { padding: 1.5rem; margin: 1rem; max-width: calc(100vw - 2rem); }
+  .beta-banner { flex-wrap: wrap; gap: 0.4rem; }
+  .beta-text { font-size: 0.82rem; }
+  .mes-devis-main { padding: 1.5rem 1rem 4rem; }
+  .pricing-main { padding: 2rem 1rem 4rem; }
+}

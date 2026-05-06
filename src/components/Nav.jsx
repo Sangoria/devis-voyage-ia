@@ -14,7 +14,8 @@ export default function Nav() {
   const { user, profile, isSubscribed, signOut } = useAuth();
   const navigate  = useNavigate();
   const location  = useLocation();
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolled,  setScrolled]  = useState(false);
+  const [menuOpen,  setMenuOpen]  = useState(false);
 
   const isCreer     = location.pathname === "/creer";
   const isMesDevis  = location.pathname === "/mes-devis";
@@ -27,6 +28,8 @@ export default function Nav() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => { setMenuOpen(false); }, [location.pathname]);
+
   async function handleSignOut() {
     await signOut();
     navigate("/login");
@@ -35,80 +38,139 @@ export default function Nav() {
   const displayName = profile?.agency_name || user?.email?.split("@")[0] || "";
 
   return (
-    <nav className={`nav${scrolled ? " nav-scrolled" : ""}`}>
-      <div className="nav-inner">
+    <>
+      <nav className={`nav${scrolled ? " nav-scrolled" : ""}`}>
+        <div className="nav-inner">
 
-        {/* GAUCHE */}
-        <div className="nav-left">
-          {user && (
-            <>
-              <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="nav-home-icon" title="Accueil">
-                <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
-                  <path d="M3 9.5L12 2l9 7.5V20a1.5 1.5 0 01-1.5 1.5H15v-6h-6v6H4.5A1.5 1.5 0 013 20V9.5z"
-                    stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </Link>
-              <Link
-                to="/creer"
-                className={`nav-link${isCreer ? " nav-link-active" : ""}`}
-              >
-                Créer un devis
-              </Link>
-              <Link
-                to="/mes-devis"
-                className={`nav-link${isMesDevis ? " nav-link-active" : ""}`}
-              >
-                Mes devis
-              </Link>
-              <Link
-                to="/mon-compte"
-                className={`nav-link${isMonCompte ? " nav-link-active" : ""}`}
-              >
-                Mon compte
-              </Link>
-            </>
-          )}
-        </div>
-
-        {/* CENTRE */}
-        <Link to="/" className="nav-brand">
-          <span className="nav-name">
-            <span className="nav-name-q">Q</span>ovee
-          </span>
-        </Link>
-
-        {/* DROITE */}
-        <div className="nav-right">
-          {user ? (
-            <>
-              {!isSubscribed && (
-                <Link
-                  to="/pricing"
-                  className={`nav-btn-pro${isPricing ? " nav-btn-pro-active" : ""}`}
-                >
-                  Passer Pro
+          {/* GAUCHE */}
+          <div className="nav-left">
+            {user && (
+              <>
+                <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="nav-home-icon" title="Accueil">
+                  <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+                    <path d="M3 9.5L12 2l9 7.5V20a1.5 1.5 0 01-1.5 1.5H15v-6h-6v6H4.5A1.5 1.5 0 013 20V9.5z"
+                      stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
                 </Link>
-              )}
-              <Link to="/mon-compte" className="nav-user" style={{ textDecoration: "none" }}>
-                <UserAvatar name={displayName} avatarUrl={profile?.avatar_url} />
-                <span className="nav-agency">{displayName}</span>
-              </Link>
-              <button className="nav-signout" onClick={handleSignOut} title="Déconnexion">
-                <svg viewBox="0 0 18 18" fill="none" width="15" height="15">
-                  <path d="M7 16H3a1 1 0 01-1-1V3a1 1 0 011-1h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                  <path d="M12 12l4-4-4-4M16 8H7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            </>
-          ) : (
-            <>
-              <Link to="/login"  className="nav-link">Se connecter</Link>
-              <Link to="/signup" className="nav-btn-pro">S'inscrire</Link>
-            </>
-          )}
-        </div>
+                <Link
+                  to="/creer"
+                  className={`nav-link${isCreer ? " nav-link-active" : ""}`}
+                >
+                  Créer un devis
+                </Link>
+                <Link
+                  to="/mes-devis"
+                  className={`nav-link${isMesDevis ? " nav-link-active" : ""}`}
+                >
+                  Mes devis
+                </Link>
+                <Link
+                  to="/mon-compte"
+                  className={`nav-link${isMonCompte ? " nav-link-active" : ""}`}
+                >
+                  Mon compte
+                </Link>
+              </>
+            )}
+          </div>
 
-      </div>
-    </nav>
+          {/* CENTRE */}
+          <Link to="/" className="nav-brand">
+            <span className="nav-name">
+              <span className="nav-name-q">Q</span>ovee
+            </span>
+          </Link>
+
+          {/* DROITE */}
+          <div className="nav-right">
+            {user ? (
+              <>
+                {!isSubscribed && (
+                  <Link
+                    to="/pricing"
+                    className={`nav-btn-pro${isPricing ? " nav-btn-pro-active" : ""}`}
+                  >
+                    Passer Pro
+                  </Link>
+                )}
+                <Link to="/mon-compte" className="nav-user" style={{ textDecoration: "none" }}>
+                  <UserAvatar name={displayName} avatarUrl={profile?.avatar_url} />
+                  <span className="nav-agency">{displayName}</span>
+                </Link>
+                <button className="nav-signout" onClick={handleSignOut} title="Déconnexion">
+                  <svg viewBox="0 0 18 18" fill="none" width="15" height="15">
+                    <path d="M7 16H3a1 1 0 01-1-1V3a1 1 0 011-1h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    <path d="M12 12l4-4-4-4M16 8H7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+                <button
+                  className="nav-hamburger"
+                  onClick={() => setMenuOpen(o => !o)}
+                  aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+                >
+                  {menuOpen ? (
+                    <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
+                      <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
+                      <path d="M3 8h18M3 16h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                  )}
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login"  className="nav-link">Se connecter</Link>
+                <Link to="/signup" className="nav-btn-pro">S'inscrire</Link>
+              </>
+            )}
+          </div>
+
+        </div>
+      </nav>
+
+      {/* Menu mobile — utilisateurs connectés uniquement */}
+      {user && menuOpen && (
+        <div className="nav-mobile-menu">
+          <Link to="/" className="nav-mobile-link" onClick={() => setMenuOpen(false)}>
+            Accueil
+          </Link>
+          <Link
+            to="/creer"
+            className={`nav-mobile-link${isCreer ? " nav-mobile-link-active" : ""}`}
+            onClick={() => setMenuOpen(false)}
+          >
+            Créer un devis
+          </Link>
+          <Link
+            to="/mes-devis"
+            className={`nav-mobile-link${isMesDevis ? " nav-mobile-link-active" : ""}`}
+            onClick={() => setMenuOpen(false)}
+          >
+            Mes devis
+          </Link>
+          <Link
+            to="/mon-compte"
+            className={`nav-mobile-link${isMonCompte ? " nav-mobile-link-active" : ""}`}
+            onClick={() => setMenuOpen(false)}
+          >
+            Mon compte
+          </Link>
+          {!isSubscribed && (
+            <Link
+              to="/pricing"
+              className="nav-mobile-link nav-mobile-link-pro"
+              onClick={() => setMenuOpen(false)}
+            >
+              Passer Pro →
+            </Link>
+          )}
+          <button className="nav-mobile-signout" onClick={handleSignOut}>
+            Se déconnecter
+          </button>
+        </div>
+      )}
+    </>
   );
 }
